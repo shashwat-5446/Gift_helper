@@ -1,0 +1,151 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* GLOBAL */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #fdf6f0;
+  overflow: hidden;
+}
+
+/* ==========================
+   LOADING SCREEN
+========================== */
+.loader {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ffd6e0, #cce6ff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: hideLoader 3s forwards;
+  z-index: 10;
+}
+
+.gift {
+  font-size: 80px;
+  animation: bounce 1.2s infinite;
+}
+
+.loader p {
+  margin-top: 15px;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+/* Loader Animations */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes hideLoader {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ==========================
+   MAIN APP
+========================== */
+.app {
+  opacity: 0;
+  animation: showApp 1s ease forwards;
+  animation-delay: 3s;
+  padding: 40px;
+}
+
+@keyframes showApp {
+  to { opacity: 1; }
+}
+
+/* HEADER */
+.paint-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.paint-header h1 {
+  font-family: 'Pacifico', cursive;
+  font-size: 48px;
+  color: #333;
+}
+
+.paint-header p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* ==========================
+   PAINT AREA
+========================== */
+.paint-area {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+/* BRUSH CARDS */
+.brush-card {
+  width: 240px;
+  padding: 30px;
+  color: #333;
+  border-radius: 60% 40% 55% 45%;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  transform: rotate(-2deg);
+  transition: all 0.3s ease;
+}
+
+.brush-card:hover {
+  transform: rotate(0deg) scale(1.05);
+}
+
+/* COLOR VARIANTS */
+.pink {
+  background: linear-gradient(135deg, #ffb3c6, #ffd6e0);
+}
+
+.blue {
+  background: linear-gradient(135deg, #b3e5ff, #e0f4ff);
+}
+
+.yellow {
+  background: linear-gradient(135deg, #ffeaa7, #fff3c4);
+}
+
+/* TEXT */
+.brush-card h2 {
+  font-family: 'Pacifico', cursive;
+  margin-bottom: 10px;
+}
+
+.brush-card p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+/* BUTTON */
+.brush-card button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #fff;
+  color: #333;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.brush-card button:hover {
+  background: #333;
+  color: #fff;
+}
