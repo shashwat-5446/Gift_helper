@@ -68,10 +68,6 @@ def chat_screen():
         "What kind of gift feels right?",
         ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian" ,"Rustic" , "Traditional" ]
     )
-    st.session_state.answers["style"] = st.selectbox(
-        "Preferred style?",
-       ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
-    )
     st.session_state.answers["photo"] = st.file_uploader(
         "Upload a photo (optional)",
         type=["jpg", "jpeg", "png"]
