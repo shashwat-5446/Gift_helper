@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 
 # -----------------------------
 # Page Config
@@ -10,24 +11,97 @@ st.set_page_config(
 )
 
 # -----------------------------
+# CUSTOM CSS (PAINT BRUSH STYLE)
+# -----------------------------
+st.markdown("""
+<style>
+/* Hide Streamlit branding */
+#MainMenu, footer, header {visibility: hidden;}
+
+/* Background */
+.stApp {
+    background: linear-gradient(135deg, #fdf6f0, #ffeef6);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Center container */
+.block-container {
+    padding-top: 3rem;
+}
+
+/* Paint brush cards */
+.paint-card {
+    background: linear-gradient(135deg, #ffd6e0, #cce6ff);
+    border-radius: 60% 40% 55% 45%;
+    padding: 30px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* Headings */
+h1, h2, h3 {
+    text-align: center;
+}
+
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(135deg, #ff9aa2, #ffb7b2);
+    border: none;
+    border-radius: 30px;
+    padding: 0.75rem;
+    font-size: 16px;
+    color: white;
+    transition: 0.3s ease;
+}
+
+.stButton>button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ff758f, #ff9a9e);
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------------
 # Session State Init
 # -----------------------------
 if "page" not in st.session_state:
-    st.session_state.page = "landing"
+    st.session_state.page = "loading"
 
 if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -----------------------------
+# LOADING SCREEN
+# -----------------------------
+def loading_screen():
+    st.markdown(
+        """
+        <div class="paint-card">
+            <div style="font-size:80px;">🎁</div>
+            <h2>Preparing your gift experience...</h2>
+            <p style="color:gray;">Just a moment ✨</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    time.sleep(2)
+    st.session_state.page = "landing"
+    st.rerun()
+
+# -----------------------------
 # LANDING SCREEN
 # -----------------------------
 def landing_screen():
-    st.markdown("<h1 style='text-align:center;'>Find the Perfect Personalized Gift 🎁</h1>", unsafe_allow_html=True)
-
     st.markdown(
-        "<p style='text-align:center; color:gray;'>"
-        "Answer a few questions. Get matched in under 2 minutes."
-        "</p>",
+        """
+        <div class="paint-card">
+            <h1>Find the Perfect Personalized Gift 🎁</h1>
+            <p style="color:gray;">
+                Answer a few questions. Get matched in under 2 minutes.
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -47,7 +121,7 @@ def landing_screen():
 # CHAT / QUESTION FLOW
 # -----------------------------
 def chat_screen():
-    st.header("Let’s find the right gift")
+    st.markdown("<h2>Let’s find the right gift 🎨</h2>", unsafe_allow_html=True)
 
     st.session_state.answers["recipient"] = st.selectbox(
         "Who is this gift for?",
@@ -83,7 +157,7 @@ def chat_screen():
         st.session_state.page = "result"
 
 # -----------------------------
-# SIMPLE RECOMMENDATION LOGIC
+# RECOMMENDATION LOGIC
 # -----------------------------
 def generate_recommendation(answers):
     if answers["type"] == "Emotional":
@@ -104,12 +178,18 @@ def generate_recommendation(answers):
 # RESULT SCREEN
 # -----------------------------
 def result_screen():
-    st.header("🎉 Your Personalized Gift Recommendation")
-
     product, reason = generate_recommendation(st.session_state.answers)
 
-    st.subheader(product)
-    st.write(reason)
+    st.markdown(
+        f"""
+        <div class="paint-card">
+            <h2>🎉 Your Personalized Gift</h2>
+            <h3>{product}</h3>
+            <p>{reason}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown("### Why this works:")
     st.write(
@@ -118,10 +198,6 @@ def result_screen():
         f"- Matches your **{st.session_state.answers['budget']}** budget"
     )
 
-    st.markdown("---")
-
-    st.info("Next step: We’ll connect you with trusted customizers (coming next).")
-
     if st.button("Start Over"):
         st.session_state.page = "landing"
         st.session_state.answers = {}
@@ -129,10 +205,12 @@ def result_screen():
 # -----------------------------
 # PAGE ROUTER
 # -----------------------------
-if st.session_state.page == "landing":
+if st.session_state.page == "loading":
+    loading_screen()
+elif st.session_state.page == "landing":
     landing_screen()
 elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
-# -----------------------------
+

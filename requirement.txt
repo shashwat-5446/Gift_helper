@@ -1,1 +1,1 @@
-streamlit==1.26.0
+Flask==2.3.3
