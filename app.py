@@ -56,7 +56,7 @@ def chat_screen():
 
     st.session_state.answers["occasion"] = st.selectbox(
         "What’s the occasion?",
-        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because",]
+        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because"]
     )
 
     st.session_state.answers["budget"] = st.selectbox(
