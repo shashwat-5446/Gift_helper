@@ -64,7 +64,7 @@ p, label {
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# SESSION STATE (SAFE INIT)
+# SESSION STATE INIT
 # -------------------------------------------------
 if "page" not in st.session_state:
     st.session_state.page = "loading"
@@ -88,11 +88,11 @@ def loading_screen():
         </div>
         """, unsafe_allow_html=True)
 
-        with st.spinner("Loading..."):
-            time.sleep(1.5)
+        time.sleep(1.5)
 
         st.session_state.loaded = True
         st.session_state.page = "landing"
+        st.experimental_rerun()
 
 # -------------------------------------------------
 # LANDING SCREEN
@@ -155,11 +155,11 @@ def chat_screen():
 def generate_recommendation(budget, style, occasion, recipient):
 
     if budget == "under ₹500":
-        if style == "Minimal" and occasion in ["Birthday", "Just because"]:
-            return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
-
-        if style == "Minimal" and occasion == "Memory / Keepsake":
-            return "Single Photo Print", "A small but meaningful memory."
+        if style == "Minimal":
+            if occasion in ["Birthday", "Just because"]:
+                return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
+            if occasion == "Memory / Keepsake":
+                return "Single Photo Print", "A small but meaningful memory."
 
         if style == "Cute" and recipient in ["Friend", "Partner"]:
             return "Cute Keychain or Mini Plush", "Fun, light, and affordable."
@@ -188,6 +188,7 @@ def generate_recommendation(budget, style, occasion, recipient):
 # -------------------------------------------------
 def result_screen():
     a = st.session_state.answers
+
     product, reason = generate_recommendation(
         a["budget"], a["style"], a["occasion"], a["recipient"]
     )
