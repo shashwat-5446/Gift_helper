@@ -10,6 +10,78 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
+# MODERN UI STYLING (WARM IVORY + GARAMOND)
+# -------------------------------------------------
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&display=swap');
+
+/* Hide Streamlit defaults */
+#MainMenu, footer, header {visibility: hidden;}
+
+/* App background */
+.stApp {
+    background-color: #F7F3EB; /* warm ivory */
+    font-family: 'EB Garamond', serif;
+}
+
+/* Center container */
+.block-container {
+    padding-top: 3rem;
+    max-width: 700px;
+}
+
+/* Headings */
+h1, h2, h3 {
+    font-family: 'EB Garamond', serif;
+    color: #2E2A26;
+    text-align: center;
+}
+
+/* Paragraphs */
+p, label {
+    color: #5E5A55;
+    font-size: 16px;
+}
+
+/* Card style */
+.card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
+}
+
+/* Buttons */
+.stButton > button {
+    background: #2E2A26;
+    color: #FFFFFF;
+    border-radius: 30px;
+    padding: 0.75rem 1.2rem;
+    font-size: 16px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    background: #1F1C19;
+    transform: scale(1.05);
+}
+
+/* Select boxes */
+.stSelectbox > div {
+    border-radius: 10px;
+}
+
+/* Info box */
+.stAlert {
+    border-radius: 12px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------
 # SESSION STATE
 # -------------------------------------------------
 if "page" not in st.session_state:
@@ -19,7 +91,7 @@ if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -------------------------------------------------
-# GIFT DATABASE (CLEAN & SCALABLE)
+# GIFT DATABASE
 # -------------------------------------------------
 GIFTS = [
     {
@@ -88,11 +160,9 @@ GIFTS = [
 ]
 
 # -------------------------------------------------
-# RECOMMENDATION ENGINE (CLEAN & SMART)
+# RECOMMENDATION ENGINE
 # -------------------------------------------------
 def generate_recommendation(answers):
-    matches = []
-
     for gift in GIFTS:
         if (
             gift["budget"] == answers["budget"]
@@ -101,14 +171,8 @@ def generate_recommendation(answers):
             and answers["occasion"] in gift["occasions"]
             and answers["recipient"] in gift["recipients"]
         ):
-            matches.append(gift)
+            return gift["name"], gift["reason"]
 
-    # If we found a perfect match
-    if matches:
-        gift = matches[0]
-        return gift["name"], gift["reason"]
-
-    # Fallback logic (partial matches)
     for gift in GIFTS:
         if gift["budget"] == answers["budget"]:
             return gift["name"], "This option fits your budget and overall preferences."
@@ -116,19 +180,23 @@ def generate_recommendation(answers):
     return "Personalized Gift Card", "A flexible choice when preferences vary."
 
 # -------------------------------------------------
-# LANDING SCREEN
+# SCREENS
 # -------------------------------------------------
 def landing_screen():
-    st.markdown("<h1 style='text-align:center;'>Find the Perfect Personalized Gift 🎁</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;color:gray;'>Answer a few questions. Get matched in under 2 minutes.</p>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card">
+        <h1>Find the Perfect Personalized Gift 🎁</h1>
+        <p style="text-align:center;">
+            Answer a few thoughtful questions and get matched in under 2 minutes.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.button("🎁 Find a Personalized Gift", use_container_width=True):
         st.session_state.page = "chat"
 
-# -------------------------------------------------
-# QUESTION FLOW
-# -------------------------------------------------
 def chat_screen():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("Let’s find the right gift")
 
     st.session_state.answers["recipient"] = st.selectbox(
@@ -159,15 +227,18 @@ def chat_screen():
     if st.button("Get Recommendation", use_container_width=True):
         st.session_state.page = "result"
 
-# -------------------------------------------------
-# RESULT SCREEN
-# -------------------------------------------------
+    st.markdown('</div>', unsafe_allow_html=True)
+
 def result_screen():
     product, reason = generate_recommendation(st.session_state.answers)
 
-    st.header("🎉 Your Personalized Gift Recommendation")
-    st.subheader(product)
-    st.write(reason)
+    st.markdown(f"""
+    <div class="card">
+        <h2>🎉 Your Personalized Gift</h2>
+        <h3>{product}</h3>
+        <p>{reason}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("### Why this works:")
     st.write(
@@ -189,3 +260,9 @@ elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
+    st.markdown(
+        "<p style='text-align:center; font-size:12px; color:gray;'>"
+        "No signup. No payment. Just recommendations."
+        "</p>",
+        unsafe_allow_html=True
+    )
