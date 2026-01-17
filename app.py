@@ -136,12 +136,12 @@ GIFTS = [
         "reason": "Clean design with emotional value."
     },
     {
-        "name"
-: "Artistic Watercolor Portrait",
+        "name": "Artistic Watercolor Portrait",
         "budget": "₹1000–₹2000",
         "style": "Artistic",
         "type": "Emotional",
         "occasions": ["Birthday", "Memory / Keepsake"],
         "recipients": ["Partner", "Friend", "Parent"],
         "reason": "A unique and heartfelt keepsake."
-    },]
+    }
+]
