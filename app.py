@@ -92,7 +92,7 @@ def loading_screen():
 
         st.session_state.loaded = True
         st.session_state.page = "landing"
-        st.experimental_rerun()
+        st.rerun()
 
 # -------------------------------------------------
 # LANDING SCREEN
