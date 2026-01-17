@@ -64,28 +64,35 @@ p, label {
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# SESSION STATE
+# SESSION STATE (SAFE INIT)
 # -------------------------------------------------
 if "page" not in st.session_state:
     st.session_state.page = "loading"
+
+if "loaded" not in st.session_state:
+    st.session_state.loaded = False
 
 if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -------------------------------------------------
-# LOADING SCREEN (SAFE)
+# LOADING SCREEN (RUNS ONCE)
 # -------------------------------------------------
 def loading_screen():
-    st.markdown("""
-    <div class="card" style="text-align:center;">
-        <div style="font-size:64px;">🎁</div>
-        <h2>Preparing your gift experience</h2>
-        <p>Thoughtful things take a moment…</p>
-    </div>
-    """, unsafe_allow_html=True)
+    if not st.session_state.loaded:
+        st.markdown("""
+        <div class="card" style="text-align:center;">
+            <div style="font-size:64px;">🎁</div>
+            <h2>Preparing your gift experience</h2>
+            <p>Thoughtful things take a moment…</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    time.sleep(1.5)
-    st.session_state.page = "landing"
+        with st.spinner("Loading..."):
+            time.sleep(1.5)
+
+        st.session_state.loaded = True
+        st.session_state.page = "landing"
 
 # -------------------------------------------------
 # LANDING SCREEN
@@ -112,15 +119,30 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox("Who is this gift for?", ["Partner", "Friend", "Parent", "Pet", "Self"])
-    a["occasion"] = st.selectbox("What’s the occasion?",
-        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"])
-    a["budget"] = st.selectbox("Your budget range?",
-        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
-    a["type"] = st.selectbox("What kind of gift feels right?",
-        ["Decorative", "Usable", "Emotional"])
-    a["style"] = st.selectbox("Preferred style?",
-        ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"])
+    a["recipient"] = st.selectbox(
+        "Who is this gift for?",
+        ["Partner", "Friend", "Parent", "Pet", "Self"]
+    )
+
+    a["occasion"] = st.selectbox(
+        "What’s the occasion?",
+        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
+    )
+
+    a["budget"] = st.selectbox(
+        "Your budget range?",
+        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
+    )
+
+    a["type"] = st.selectbox(
+        "What kind of gift feels right?",
+        ["Decorative", "Usable", "Emotional"]
+    )
+
+    a["style"] = st.selectbox(
+        "Preferred style?",
+        ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
+    )
 
     if st.button("Get Recommendation", use_container_width=True):
         st.session_state.page = "result"
@@ -128,16 +150,16 @@ def chat_screen():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------
-# RECOMMENDATION LOGIC (YOUR IF/ELIF)
+# RECOMMENDATION LOGIC
 # -------------------------------------------------
 def generate_recommendation(budget, style, occasion, recipient):
 
     if budget == "under ₹500":
-        if style == "Minimal":
-            if occasion in ["Birthday", "Just because"]:
-                return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
-            if occasion == "Memory / Keepsake":
-                return "Single Photo Print", "A small but meaningful memory."
+        if style == "Minimal" and occasion in ["Birthday", "Just because"]:
+            return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
+
+        if style == "Minimal" and occasion == "Memory / Keepsake":
+            return "Single Photo Print", "A small but meaningful memory."
 
         if style == "Cute" and recipient in ["Friend", "Partner"]:
             return "Cute Keychain or Mini Plush", "Fun, light, and affordable."
