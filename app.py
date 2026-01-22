@@ -1,8 +1,7 @@
 import streamlit as st
-import time
 
 # -------------------------------------------------
-# PAGE CONFIG
+# PAGE CONFIG (MUST BE FIRST)
 # -------------------------------------------------
 st.set_page_config(
     page_title="Personalized Gift Finder",
@@ -32,6 +31,7 @@ st.markdown("""
 h1, h2, h3 {
     color: #3A2F2F;
     text-align: center;
+    letter-spacing: 0.4px;
 }
 
 p, label {
@@ -50,7 +50,7 @@ p, label {
 .stButton > button {
     background-color: #3A2F2F;
     color: #FBF8F3;
-    border-radius: 28px;
+    border-radius: 26px;
     padding: 0.8rem 1.4rem;
     font-size: 16px;
     border: none;
@@ -64,35 +64,103 @@ p, label {
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# SESSION STATE INIT
+# SESSION STATE
 # -------------------------------------------------
 if "page" not in st.session_state:
-    st.session_state.page = "loading"
-
-if "loaded" not in st.session_state:
-    st.session_state.loaded = False
+    st.session_state.page = "landing"
 
 if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -------------------------------------------------
-# LOADING SCREEN (RUNS ONCE)
+# GIFT DATABASE (AI SCORING BASE)
 # -------------------------------------------------
-def loading_screen():
-    if not st.session_state.loaded:
-        st.markdown("""
-        <div class="card" style="text-align:center;">
-            <div style="font-size:64px;">🎁</div>
-            <h2>Preparing your gift experience</h2>
-            <p>Thoughtful things take a moment…</p>
-        </div>
-        """, unsafe_allow_html=True)
+GIFTS = [
+    {
+        "name": "Minimal Ceramic Mug",
+        "budget": "under ₹500",
+        "style": ["Minimal"],
+        "type": ["Usable"],
+        "occasion": ["Birthday", "Just because"],
+        "recipient": ["Friend", "Partner", "Self"],
+        "reason": "Simple, useful, and clutter-free."
+    },
+    {
+        "name": "Single Photo Print",
+        "budget": "under ₹500",
+        "style": ["Minimal"],
+        "type": ["Emotional"],
+        "occasion": ["Memory / Keepsake"],
+        "recipient": ["Partner", "Parent"],
+        "reason": "A small but meaningful memory."
+    },
+    {
+        "name": "Framed Minimal Photo Print",
+        "budget": "₹500–₹1000",
+        "style": ["Minimal", "Luxury"],
+        "type": ["Emotional"],
+        "occasion": ["Birthday", "Anniversary"],
+        "recipient": ["Partner", "Friend", "Parent"],
+        "reason": "Clean design with emotional value."
+    },
+    {
+        "name": "Abstract Art Print",
+        "budget": "₹500–₹1000",
+        "style": ["Artistic", "Modern"],
+        "type": ["Decorative"],
+        "occasion": ["Birthday", "Festival"],
+        "recipient": ["Friend", "Self"],
+        "reason": "Adds personality without being loud."
+    },
+    {
+        "name": "Personalized Photo Frame Set",
+        "budget": "₹1000–₹2000",
+        "style": ["Luxury", "Vintage"],
+        "type": ["Emotional"],
+        "occasion": ["Anniversary"],
+        "recipient": ["Partner"],
+        "reason": "Romantic and premium."
+    },
+    {
+        "name": "Customized Gift Box",
+        "budget": "₹2000+",
+        "style": ["Luxury"],
+        "type": ["Emotional", "Usable"],
+        "occasion": ["Birthday", "Anniversary"],
+        "recipient": ["Partner", "Parent"],
+        "reason": "High-end, curated experience."
+    }
+]
 
-        time.sleep(1.5)
+# -------------------------------------------------
+# AI-STYLE SCORING ENGINE
+# -------------------------------------------------
+def generate_recommendation(answers):
+    best_score = -1
+    best_gift = None
 
-        st.session_state.loaded = True
-        st.session_state.page = "landing"
-        st.rerun()
+    for gift in GIFTS:
+        score = 0
+
+        if answers["budget"] == gift["budget"]:
+            score += 4
+        if answers["style"] in gift["style"]:
+            score += 3
+        if answers["type"] in gift["type"]:
+            score += 3
+        if answers["occasion"] in gift["occasion"]:
+            score += 2
+        if answers["recipient"] in gift["recipient"]:
+            score += 2
+
+        if score > best_score:
+            best_score = score
+            best_gift = gift
+
+    if best_gift:
+        return best_gift["name"], best_gift["reason"]
+
+    return "Personalized Gift Card", "A flexible choice when preferences vary."
 
 # -------------------------------------------------
 # LANDING SCREEN
@@ -119,79 +187,28 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox(
-        "Who is this gift for?",
-        ["Partner", "Friend", "Parent", "Pet", "Self"]
-    )
-
-    a["occasion"] = st.selectbox(
-        "What’s the occasion?",
-        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
-    )
-
-    a["budget"] = st.selectbox(
-        "Your budget range?",
-        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
-    )
-
-    a["type"] = st.selectbox(
-        "What kind of gift feels right?",
-        ["Decorative", "Usable", "Emotional"]
-    )
-
-    a["style"] = st.selectbox(
-        "Preferred style?",
-        ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
-    )
+    a["recipient"] = st.selectbox("Who is this gift for?",
+        ["Partner", "Friend", "Parent", "Pet", "Self"])
+    a["occasion"] = st.selectbox("What’s the occasion?",
+        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"])
+    a["budget"] = st.selectbox("Your budget range?",
+        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
+    a["type"] = st.selectbox("What kind of gift feels right?",
+        ["Decorative", "Usable", "Emotional"])
+    a["style"] = st.selectbox("Preferred style?",
+        ["Minimal", "Artistic", "Cute", "Luxury", "Modern",
+         "Vintage", "Bohemian", "Rustic", "Traditional"])
 
     if st.button("Get Recommendation", use_container_width=True):
         st.session_state.page = "result"
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# -------------------------------------------------
-# RECOMMENDATION LOGIC
-# -------------------------------------------------
-def generate_recommendation(budget, style, occasion, recipient):
-
-    if budget == "under ₹500":
-        if style == "Minimal":
-            if occasion in ["Birthday", "Just because"]:
-                return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
-            if occasion == "Memory / Keepsake":
-                return "Single Photo Print", "A small but meaningful memory."
-
-        if style == "Cute" and recipient in ["Friend", "Partner"]:
-            return "Cute Keychain or Mini Plush", "Fun, light, and affordable."
-
-        if style == "Traditional":
-            return "Incense Sticks + Holder", "Culturally meaningful and calming."
-
-    elif budget == "₹500–₹1000":
-        if style == "Minimal":
-            return "Framed Minimal Photo Print", "Clean design with emotional value."
-
-        if style == "Artistic":
-            return "Abstract Art Print", "Adds personality without being loud."
-
-    elif budget == "₹1000–₹2000":
-        if style == "Luxury":
-            return "Personalized Photo Frame Set", "Romantic and premium."
-
-    elif budget == "₹2000+":
-        return "Customized Gift Box", "High-end, curated experience."
-
-    return "Personalized Gift Card", "A flexible choice when preferences vary."
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # RESULT SCREEN
 # -------------------------------------------------
 def result_screen():
-    a = st.session_state.answers
-
-    product, reason = generate_recommendation(
-        a["budget"], a["style"], a["occasion"], a["recipient"]
-    )
+    product, reason = generate_recommendation(st.session_state.answers)
 
     st.markdown(f"""
     <div class="card">
@@ -206,13 +223,17 @@ def result_screen():
         st.session_state.answers = {}
 
 # -------------------------------------------------
-# ROUTER (MUST BE LAST)
+# ROUTER (ALWAYS LAST)
 # -------------------------------------------------
-if st.session_state.page == "loading":
-    loading_screen()
-elif st.session_state.page == "landing":
+if st.session_state.page == "landing":
     landing_screen()
 elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
+    st.markdown(
+        "<p style='text-align:center; font-size:12px; color:gray;'>"
+        "No signup. No payment. Just recommendations."      
+        "</p>",
+        unsafe_allow_html=True
+    )
