@@ -187,40 +187,68 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox("Who is this gift for?",
-        ["Partner", "Friend", "Parent", "Pet", "Self"])
-    a["occasion"] = st.selectbox("What’s the occasion?",
-        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"])
-    a["budget"] = st.selectbox("Your budget range?",
-        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
-    a["type"] = st.selectbox("What kind of gift feels right?",
-        ["Decorative", "Usable", "Emotional"])
-    a["style"] = st.selectbox("Preferred style?",
-        ["Minimal", "Artistic", "Cute", "Luxury", "Modern",
-         "Vintage", "Bohemian", "Rustic", "Traditional"])
+    a["recipient"] = st.selectbox(
+        "Who is this gift for?",
+        ["Select one", "Partner", "Friend", "Parent", "Pet", "Self"]
+    )
 
-    if st.button("Get Recommendation", use_container_width=True):
-        st.session_state.page = "result"
+    a["occasion"] = st.selectbox(
+        "What’s the occasion?",
+        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
+    )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    a["budget"] = st.selectbox(
+        "Your budget range?",
+        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
+    )
+
+    a["type"] = st.selectbox(
+        "What kind of gift feels right?",
+        ["Select one", "Decorative", "Usable", "Emotional"]
+    )
+
+    a["style"] = st.selectbox(
+        "Preferred style?",
+        ["Select one", "Minimal", "Artistic", "Cute", "Luxury", "Modern",
+         "Vintage", "Bohemian", "Rustic", "Traditional"]
+    )
+
+    # -------------------------------------------------
+    # BOOLEAN VALIDATION (COMPULSORY SELECTION)
+    # -------------------------------------------------
+    if st.button("Get My Recommendation", use_container_width=True):
+        if (a["recipient"] == "Select one" or
+            a["occasion"] == "Select one" or
+            a["budget"] == "Select one" or
+            a["type"] == "Select one" or
+            a["style"] == "Select one"):
+            st.warning("Please answer all the questions to proceed.")
+        else:
+            st.session_state.page = "result"
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------
 # RESULT SCREEN
 # -------------------------------------------------
 def result_screen():
-    product, reason = generate_recommendation(st.session_state.answers)
-
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.header("Your Personalized Gift 🎁")
+    
+    gift_name, gift_reason = generate_recommendation(st.session_state.answers)
+    
     st.markdown(f"""
-    <div class="card">
-        <h2>Your Personalized Gift</h2>
-        <h3>{product}</h3>
-        <p>{reason}</p>
-    </div>
+    <p style="text-align:center; font-size:20px; font-weight:bold;">
+    {gift_name}
+    </p>
+    <p style="text-align:center;">
+    {gift_reason}
+    </p>
     """, unsafe_allow_html=True)
-
-    if st.button("Start Over"):
-        st.session_state.page = "landing"
-        st.session_state.answers = {}
+    
+    if st.button("← Find Another Gift", use_container_width=True):
+        st.session_state.page = "chat"
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------
 # ROUTER (ALWAYS LAST)
