@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# OLD MONEY UI STYLING + BUTTON STATES
+# UI STYLING + BUTTON STATES (STREAMLIT-SAFE)
 # -------------------------------------------------
 st.markdown("""
 <style>
@@ -31,7 +31,6 @@ st.markdown("""
 h1, h2, h3 {
     color: #3A2F2F;
     text-align: center;
-    letter-spacing: 0.4px;
 }
 
 p, label {
@@ -48,30 +47,32 @@ p, label {
 }
 
 /* BUTTON BASE */
-.stButton > button {
+div.stButton > button {
     border-radius: 26px;
-    padding: 0.8rem 1.4rem;
+    padding: 0.9rem 1.4rem;
     font-size: 16px;
-    border: none;
+    font-weight: 500;
+    transition: all 0.25s ease-in-out;
 }
 
-/* DISABLED BUTTON */
-button:disabled {
-    background-color: #B5ABA6 !important;
-    color: #ffffff !important;
-    cursor: not-allowed !important;
+/* ENABLED */
+div.stButton > button:not([disabled]) {
+    background-color: #2E7D32;
+    color: white;
 }
 
-/* ENABLED BUTTON */
-button:not(:disabled) {
-    background-color: #2E7D32 !important;
-    color: #ffffff !important;
+/* HOVER */
+div.stButton > button:not([disabled]):hover {
+    background-color: #256628;
+    transform: scale(1.05);
 }
 
-/* ENABLED HOVER */
-button:not(:disabled):hover {
-    background-color: #256628 !important;
-    transform: scale(1.04);
+/* DISABLED */
+div.stButton > button[disabled] {
+    background-color: #BDB4AF;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.8;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -164,23 +165,50 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox("Who is this gift for?",
-        ["Select one", "Partner", "Friend", "Parent", "Self"])
+    a["recipient"] = st.selectbox(
+        "Who is this gift for?",
+        ["Select one", "Partner", "Friend", "Parent", "Self"]
+    )
 
-    a["occasion"] = st.selectbox("What’s the occasion?",
-        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"])
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
 
-    a["budget"] = st.selectbox("Your budget range?",
-        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
+    a["occasion"] = st.selectbox(
+        "What’s the occasion?",
+        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"]
+    )
 
-    a["type"] = st.selectbox("What kind of gift feels right?",
-        ["Select one", "Decorative", "Usable", "Emotional"])
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
 
-    a["style"] = st.selectbox("Preferred style?",
-        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"])
+    a["budget"] = st.selectbox(
+        "Your budget range?",
+        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
+    )
 
-    # VALIDATION BOOLEAN
-    all_selected = all(v != "Select one" for v in a.values())
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+
+    a["type"] = st.selectbox(
+        "What kind of gift feels right?",
+        ["Select one", "Decorative", "Usable", "Emotional"]
+    )
+
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+
+    a["style"] = st.selectbox(
+        "Preferred style?",
+        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"]
+    )
+
+    # -------------------------------------------------
+    # VALIDATION + FEEDBACK
+    # -------------------------------------------------
+    total = 5
+    filled = sum(v != "Select one" for v in a.values())
+    all_selected = filled == total
+
+    st.progress(filled / total)
+
+    if not all_selected:
+        st.caption("Answer all questions to unlock the recommendation 👆")
 
     if st.button(
         "Get My Recommendation",
@@ -202,10 +230,10 @@ def result_screen():
 
     st.markdown(f"""
     <p style="text-align:center; font-size:20px; font-weight:bold;">
-    {gift_name}
+        {gift_name}
     </p>
     <p style="text-align:center;">
-    {gift_reason}
+        {gift_reason}
     </p>
     """, unsafe_allow_html=True)
 
@@ -223,3 +251,4 @@ elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
+# -------------------------------------------------
