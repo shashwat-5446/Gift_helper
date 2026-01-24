@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# OLD MONEY UI STYLING
+# OLD MONEY UI STYLING + BUTTON STATES
 # -------------------------------------------------
 st.markdown("""
 <style>
@@ -47,17 +47,30 @@ p, label {
     margin-bottom: 30px;
 }
 
+/* BUTTON BASE */
 .stButton > button {
-    background-color: #3A2F2F;
-    color: #FBF8F3;
     border-radius: 26px;
     padding: 0.8rem 1.4rem;
     font-size: 16px;
     border: none;
 }
 
-.stButton > button:hover {
-    background-color: #2A2121;
+/* DISABLED BUTTON */
+button:disabled {
+    background-color: #B5ABA6 !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+}
+
+/* ENABLED BUTTON */
+button:not(:disabled) {
+    background-color: #2E7D32 !important;
+    color: #ffffff !important;
+}
+
+/* ENABLED HOVER */
+button:not(:disabled):hover {
+    background-color: #256628 !important;
     transform: scale(1.04);
 }
 </style>
@@ -73,7 +86,7 @@ if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -------------------------------------------------
-# GIFT DATABASE (AI SCORING BASE)
+# GIFT DATABASE
 # -------------------------------------------------
 GIFTS = [
     {
@@ -102,38 +115,11 @@ GIFTS = [
         "occasion": ["Birthday", "Anniversary"],
         "recipient": ["Partner", "Friend", "Parent"],
         "reason": "Clean design with emotional value."
-    },
-    {
-        "name": "Abstract Art Print",
-        "budget": "₹500–₹1000",
-        "style": ["Artistic", "Modern"],
-        "type": ["Decorative"],
-        "occasion": ["Birthday", "Festival"],
-        "recipient": ["Friend", "Self"],
-        "reason": "Adds personality without being loud."
-    },
-    {
-        "name": "Personalized Photo Frame Set",
-        "budget": "₹1000–₹2000",
-        "style": ["Luxury", "Vintage"],
-        "type": ["Emotional"],
-        "occasion": ["Anniversary"],
-        "recipient": ["Partner"],
-        "reason": "Romantic and premium."
-    },
-    {
-        "name": "Customized Gift Box",
-        "budget": "₹2000+",
-        "style": ["Luxury"],
-        "type": ["Emotional", "Usable"],
-        "occasion": ["Birthday", "Anniversary"],
-        "recipient": ["Partner", "Parent"],
-        "reason": "High-end, curated experience."
     }
 ]
 
 # -------------------------------------------------
-# AI-STYLE SCORING ENGINE
+# SCORING ENGINE
 # -------------------------------------------------
 def generate_recommendation(answers):
     best_score = -1
@@ -141,26 +127,17 @@ def generate_recommendation(answers):
 
     for gift in GIFTS:
         score = 0
-
-        if answers["budget"] == gift["budget"]:
-            score += 4
-        if answers["style"] in gift["style"]:
-            score += 3
-        if answers["type"] in gift["type"]:
-            score += 3
-        if answers["occasion"] in gift["occasion"]:
-            score += 2
-        if answers["recipient"] in gift["recipient"]:
-            score += 2
+        if answers["budget"] == gift["budget"]: score += 4
+        if answers["style"] in gift["style"]: score += 3
+        if answers["type"] in gift["type"]: score += 3
+        if answers["occasion"] in gift["occasion"]: score += 2
+        if answers["recipient"] in gift["recipient"]: score += 2
 
         if score > best_score:
             best_score = score
             best_gift = gift
 
-    if best_gift:
-        return best_gift["name"], best_gift["reason"]
-
-    return "Personalized Gift Card", "A flexible choice when preferences vary."
+    return best_gift["name"], best_gift["reason"]
 
 # -------------------------------------------------
 # LANDING SCREEN
@@ -187,44 +164,31 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox(
-        "Who is this gift for?",
-        ["Select one", "Partner", "Friend", "Parent", "Pet", "Self"]
-    )
+    a["recipient"] = st.selectbox("Who is this gift for?",
+        ["Select one", "Partner", "Friend", "Parent", "Self"])
 
-    a["occasion"] = st.selectbox(
-        "What’s the occasion?",
-        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
-    )
+    a["occasion"] = st.selectbox("What’s the occasion?",
+        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"])
 
-    a["budget"] = st.selectbox(
-        "Your budget range?",
-        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
-    )
+    a["budget"] = st.selectbox("Your budget range?",
+        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
 
-    a["type"] = st.selectbox(
-        "What kind of gift feels right?",
-        ["Select one", "Decorative", "Usable", "Emotional"]
-    )
+    a["type"] = st.selectbox("What kind of gift feels right?",
+        ["Select one", "Decorative", "Usable", "Emotional"])
 
-    a["style"] = st.selectbox(
-        "Preferred style?",
-        ["Select one", "Minimal", "Artistic", "Cute", "Luxury", "Modern",
-         "Vintage", "Bohemian", "Rustic", "Traditional"]
-    )
+    a["style"] = st.selectbox("Preferred style?",
+        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"])
 
-    # -------------------------------------------------
-    # BOOLEAN VALIDATION (COMPULSORY SELECTION)
-    # -------------------------------------------------
-    if st.button("Get My Recommendation", use_container_width=True):
-        if (a["recipient"] == "Select one" or
-            a["occasion"] == "Select one" or
-            a["budget"] == "Select one" or
-            a["type"] == "Select one" or
-            a["style"] == "Select one"):
-            st.warning("Please answer all the questions to proceed.")
-        else:
-            st.session_state.page = "result"
+    # VALIDATION BOOLEAN
+    all_selected = all(v != "Select one" for v in a.values())
+
+    if st.button(
+        "Get My Recommendation",
+        use_container_width=True,
+        disabled=not all_selected
+    ):
+        st.session_state.page = "result"
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------
@@ -233,9 +197,9 @@ def chat_screen():
 def result_screen():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.header("Your Personalized Gift 🎁")
-    
+
     gift_name, gift_reason = generate_recommendation(st.session_state.answers)
-    
+
     st.markdown(f"""
     <p style="text-align:center; font-size:20px; font-weight:bold;">
     {gift_name}
@@ -244,14 +208,14 @@ def result_screen():
     {gift_reason}
     </p>
     """, unsafe_allow_html=True)
-    
+
     if st.button("← Find Another Gift", use_container_width=True):
         st.session_state.page = "chat"
-    
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------------------------------
-# ROUTER (ALWAYS LAST)
+# ROUTER
 # -------------------------------------------------
 if st.session_state.page == "landing":
     landing_screen()
@@ -259,9 +223,3 @@ elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
-    st.markdown(
-        "<p style='text-align:center; font-size:12px; color:gray;'>"
-        "No signup. No payment. Just recommendations."      
-        "</p>",
-        unsafe_allow_html=True
-    )
