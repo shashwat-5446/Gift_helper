@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# UI STYLING + BUTTON STATES (STREAMLIT-SAFE)
+# UI STYLING (STREAMLIT-SAFE + DEVICE CONSISTENT)
 # -------------------------------------------------
 st.markdown("""
 <style>
@@ -18,26 +18,47 @@ st.markdown("""
 
 #MainMenu, footer, header {visibility: hidden;}
 
-.stApp {
-    background-color: #F6F1E9;
+/* FORCE LIGHT THEME EVERYWHERE */
+html, body, [class*="css"] {
+    color: #3A2F2F !important;
     font-family: 'Cormorant Garamond', serif;
 }
 
+/* APP BACKGROUND */
+.stApp {
+    background-color: #F6F1E9;
+}
+
+/* CONTAINER */
 .block-container {
     max-width: 720px;
     padding-top: 3rem;
 }
 
+/* HEADINGS */
 h1, h2, h3 {
-    color: #3A2F2F;
+    color: #3A2F2F !important;
     text-align: center;
 }
 
-p, label {
-    color: #5B4F4F;
+/* TEXT + LABELS */
+p, label, span {
+    color: #5B4F4F !important;
     font-size: 17px;
 }
 
+/* INPUT TEXT */
+input, textarea, select {
+    color: #3A2F2F !important;
+    background-color: #FBF8F3 !important;
+}
+
+/* SELECTBOX LABEL FIX */
+.stSelectbox label {
+    color: #3A2F2F !important;
+}
+
+/* CARD */
 .card {
     background: #FBF8F3;
     border-radius: 18px;
@@ -55,7 +76,7 @@ div.stButton > button {
     transition: all 0.25s ease-in-out;
 }
 
-/* ENABLED */
+/* ENABLED BUTTON */
 div.stButton > button:not([disabled]) {
     background-color: #2E7D32;
     color: white;
@@ -67,7 +88,7 @@ div.stButton > button:not([disabled]):hover {
     transform: scale(1.05);
 }
 
-/* DISABLED */
+/* DISABLED BUTTON */
 div.stButton > button[disabled] {
     background-color: #BDB4AF;
     color: white;
@@ -165,56 +186,30 @@ def chat_screen():
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox(
-        "Who is this gift for?",
-        ["Select one", "Partner", "Friend", "Parent", "Self"]
-    )
+    a["recipient"] = st.selectbox("Who is this gift for?",
+        ["Select one", "Partner", "Friend", "Parent", "Self"])
 
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+    a["occasion"] = st.selectbox("What’s the occasion?",
+        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"])
 
-    a["occasion"] = st.selectbox(
-        "What’s the occasion?",
-        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"]
-    )
+    a["budget"] = st.selectbox("Your budget range?",
+        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
 
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+    a["type"] = st.selectbox("What kind of gift feels right?",
+        ["Select one", "Decorative", "Usable", "Emotional"])
 
-    a["budget"] = st.selectbox(
-        "Your budget range?",
-        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
-    )
+    a["style"] = st.selectbox("Preferred style?",
+        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"])
 
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
-
-    a["type"] = st.selectbox(
-        "What kind of gift feels right?",
-        ["Select one", "Decorative", "Usable", "Emotional"]
-    )
-
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
-
-    a["style"] = st.selectbox(
-        "Preferred style?",
-        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"]
-    )
-
-    # -------------------------------------------------
-    # VALIDATION + FEEDBACK
-    # -------------------------------------------------
-    total = 5
     filled = sum(v != "Select one" for v in a.values())
+    total = 5
     all_selected = filled == total
 
     st.progress(filled / total)
 
-    if not all_selected:
-        st.caption("Answer all questions to unlock the recommendation 👆")
-
-    if st.button(
-        "Get My Recommendation",
-        use_container_width=True,
-        disabled=not all_selected
-    ):
+    if st.button("Get My Recommendation",
+                 use_container_width=True,
+                 disabled=not all_selected):
         st.session_state.page = "result"
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -251,4 +246,3 @@ elif st.session_state.page == "chat":
     chat_screen()
 elif st.session_state.page == "result":
     result_screen()
-# -------------------------------------------------
