@@ -58,7 +58,7 @@ div.stButton > button {
 /* ENABLED */
 div.stButton > button:not([disabled]) {
     background-color: #2E7D32;
-    color: black;
+    color: white;
 }
 
 /* HOVER */
@@ -70,7 +70,7 @@ div.stButton > button:not([disabled]):hover {
 /* DISABLED */
 div.stButton > button[disabled] {
     background-color: #BDB4AF;
-    color: black;
+    color: white;
     cursor: not-allowed;
     opacity: 0.8;
 }
