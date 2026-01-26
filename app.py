@@ -51,14 +51,14 @@ div.stButton > button {
     border-radius: 26px;
     padding: 0.9rem 1.4rem;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.25s ease-in-out;
 }
 
 /* ENABLED */
 div.stButton > button:not([disabled]) {
     background-color: #2E7D32;
-    color: white;
+    color: black;
 }
 
 /* HOVER */
@@ -70,7 +70,7 @@ div.stButton > button:not([disabled]):hover {
 /* DISABLED */
 div.stButton > button[disabled] {
     background-color: #BDB4AF;
-    color: white;
+    color: black;
     cursor: not-allowed;
     opacity: 0.8;
 }
