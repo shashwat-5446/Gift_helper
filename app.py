@@ -35,11 +35,55 @@ html, body, [class*="css"] {
     padding-top: 3rem;
 }
 
-/* HEADINGS */
-h1, h2, h3 {
+/* HEADINGS – STRONG VISUAL HIERARCHY */
+h1 {
     color: #3A2F2F !important;
     text-align: center;
+    font-size: 44px !important;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
 }
+
+h2 {
+    color: #3A2F2F !important;
+    text-align: center;
+    font-size: 32px !important;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+h3 {
+    color: #3A2F2F !important;
+    text-align: center;
+    font-size: 24px !important;
+    font-weight: 500;
+}
+/* HEADINGS – STRONG VISUAL HIERARCHY */
+h1 {
+    color: #3A2F2F !important;
+    text-align: center;
+    font-size: 44px !important;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
+}
+
+h2 {
+    color: #3A2F2F !important;
+    text-align: center;
+    font-size: 32px !important;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+h3 {
+    color: #3A2F2F !important;
+    text-align: center;
+    font-size: 24px !important;
+    font-weight: 500;
+}
+
 
 /* TEXT + LABELS */
 p, label, span {
