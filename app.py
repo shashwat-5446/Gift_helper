@@ -63,6 +63,13 @@ h1, h2, h3 {
     transform: scale(1.04);
 }
 
+.stButton > button:disabled {
+    background-color: #C9B99A !important;
+    color: #F6F1E9 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
 .stSelectbox > div > div {
     background-color: #FBF8F3 !important;
     border-color: #C9B99A !important;
@@ -130,30 +137,41 @@ def chat_screen():
 
     a["recipient"] = st.selectbox(
         "Who is this gift for?",
-        ["Partner", "Friend", "Parent", "Pet", "Self"]
+        ["-- Select --", "Partner", "Friend", "Parent", "Pet", "Self"]
     )
 
     a["occasion"] = st.selectbox(
         "What's the occasion?",
-        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
+        ["-- Select --", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
     )
 
     a["budget"] = st.selectbox(
         "Your budget range?",
-        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
+        ["-- Select --", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
     )
 
     a["type"] = st.selectbox(
         "What kind of gift feels right?",
-        ["Decorative", "Usable", "Emotional"]
+        ["-- Select --", "Decorative", "Usable", "Emotional"]
     )
 
     a["style"] = st.selectbox(
         "Preferred style?",
-        ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
+        ["-- Select --", "Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
     )
 
-    if st.button("Get Recommendation ✨", use_container_width=True):
+    # ✅ BOOLEAN CHECK — all fields must be answered (not "-- Select --")
+    all_answered = all(
+        v != "-- Select --" and v != "" and v is not None
+        for v in [a.get("recipient"), a.get("occasion"), a.get("budget"), a.get("type"), a.get("style")]
+    )
+
+    # Show warning if not all answered
+    if not all_answered:
+        st.warning("⚠️ Please answer all questions to continue.")
+
+    # Button is disabled until all answered
+    if st.button("Get Recommendation ✨", use_container_width=True, disabled=not all_answered):
         st.session_state.page = "result"
         st.rerun()
 
