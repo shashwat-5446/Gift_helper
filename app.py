@@ -1,7 +1,5 @@
 import streamlit as st
 import time
-import requests
-import json
 
 st.set_page_config(
     page_title="Giftapper",
@@ -26,6 +24,7 @@ html, body, .stApp {
     padding-bottom: 3rem !important;
 }
 
+/* ── Typography ── */
 h1, h2, h3 {
     font-family: 'DM Serif Display', serif !important;
     color: #1C1510 !important;
@@ -38,6 +37,7 @@ p, li, label, div {
     color: #4A3F35 !important;
 }
 
+/* ── Cards ── */
 .card {
     background: #FFFFFF;
     border-radius: 20px;
@@ -82,17 +82,7 @@ p, li, label, div {
     font-size: 12px;
     font-weight: 500;
     margin: 3px 3px 3px 0;
-}
-
-.ai-badge {
-    display: inline-block;
-    background: #1C1510;
-    color: #FDFAF5 !important;
-    border-radius: 30px;
-    padding: 4px 14px;
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 16px;
+    letter-spacing: 0.2px;
 }
 
 .progress-bar-bg {
@@ -106,6 +96,7 @@ p, li, label, div {
     background: #1C1510;
     border-radius: 10px;
     height: 4px;
+    transition: width 0.4s ease;
 }
 
 .step-label {
@@ -129,17 +120,7 @@ p, li, label, div {
     margin: 20px 0;
 }
 
-.why-box {
-    background: #F9F6F0;
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-top: 10px;
-    font-size: 13px;
-    color: #7A6A5E !important;
-    line-height: 1.6;
-    border-left: 3px solid #C9B99A;
-}
-
+/* ── Buttons ── */
 .stButton > button {
     background-color: #1C1510 !important;
     color: #FDFAF5 !important;
@@ -158,6 +139,10 @@ p, li, label, div {
     transform: translateY(-1px) !important;
 }
 
+.stButton > button:active {
+    transform: translateY(0px) !important;
+}
+
 .stButton > button:disabled {
     background-color: #D6CEBF !important;
     color: #A89880 !important;
@@ -165,7 +150,21 @@ p, li, label, div {
     transform: none !important;
 }
 
-.stSelectbox label, .stTextInput label, .stTextArea label {
+/* ── Secondary button ── */
+div[data-testid="column"]:last-child .stButton > button,
+.btn-secondary .stButton > button {
+    background-color: transparent !important;
+    color: #1C1510 !important;
+    border: 1.5px solid #1C1510 !important;
+}
+
+div[data-testid="column"]:last-child .stButton > button:hover {
+    background-color: #F3EEE6 !important;
+    opacity: 1 !important;
+}
+
+/* ── Selects ── */
+.stSelectbox label {
     font-size: 14px !important;
     font-weight: 500 !important;
     color: #1C1510 !important;
@@ -177,17 +176,14 @@ p, li, label, div {
     border: 1.5px solid #EDE8DF !important;
     border-radius: 12px !important;
     color: #1C1510 !important;
-}
-
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea {
-    background-color: #F9F6F0 !important;
-    border: 1.5px solid #EDE8DF !important;
-    border-radius: 12px !important;
-    color: #1C1510 !important;
     font-family: 'DM Sans', sans-serif !important;
 }
 
+.stSelectbox > div > div:focus-within {
+    border-color: #1C1510 !important;
+}
+
+/* ── Warning ── */
 .stAlert {
     border-radius: 12px !important;
     border: none !important;
@@ -195,6 +191,7 @@ p, li, label, div {
     color: #7A5C2E !important;
 }
 
+/* ── Link buttons ── */
 .stLinkButton > a {
     background-color: #F3EEE6 !important;
     color: #1C1510 !important;
@@ -203,7 +200,9 @@ p, li, label, div {
     font-size: 14px !important;
     font-weight: 500 !important;
     border: none !important;
+    font-family: 'DM Sans', sans-serif !important;
     text-decoration: none !important;
+    transition: background 0.2s ease !important;
 }
 
 .stLinkButton > a:hover {
@@ -213,82 +212,20 @@ p, li, label, div {
 """, unsafe_allow_html=True)
 
 # ── Session State ──
-for key, default in {
-    "page": "loading",
-    "loaded": False,
-    "answers": {},
-    "wishlist": [],
-    "recommendations": [],
-    "api_key": ""
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
-
-# ── Claude API Call ──
-def get_ai_recommendations(a, api_key):
-    prompt = f"""You are a thoughtful gift curator. Based on the details below, suggest exactly 3 unique, specific gift ideas.
-
-Recipient: {a['recipient']}
-Closeness: {a['closeness']}
-Age Group: {a['age_group']}
-Occasion: {a['occasion']}
-Budget: {a['budget']}
-Delivery: {a['delivery']}
-Gift Type: {a['type']}
-Style: {a['style']}
-Personal Note: {a.get('note', 'None provided')}
-
-Respond ONLY with a valid JSON array. No explanation, no markdown, no backticks. Example format:
-[
-  {{
-    "name": "Gift Name",
-    "reason": "One sentence why this is perfect for them.",
-    "why": "Two sentences of deeper reasoning — what makes this special for this specific person and occasion.",
-    "search_query": "short search query for amazon"
-  }}
-]
-
-Rules:
-- Be specific and creative, not generic
-- Match the budget {a['budget']} strictly
-- Match the delivery type: {a['delivery']}
-- Consider the personal note if provided
-- Keep reason under 15 words
-- Keep why under 30 words"""
-
-    response = requests.post(
-        "https://api.anthropic.com/v1/messages",
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01"
-        },
-        json={
-            "model": "claude-sonnet-4-20250514",
-            "max_tokens": 1000,
-            "messages": [{"role": "user", "content": prompt}]
-        }
-    )
-
-    data = response.json()
-    text = data["content"][0]["text"].strip()
-    gifts = json.loads(text)
-
-    for g in gifts:
-        q = g["search_query"].replace(" ", "+")
-        g["amazon"] = f"https://www.amazon.in/s?k={q}"
-        g["flipkart"] = f"https://www.flipkart.com/search?q={q}"
-        g["price"] = a["budget"]
-        g["style"] = a["style"]
-        g["delivery"] = a["delivery"]
-
-    return gifts
+if "page" not in st.session_state:
+    st.session_state.page = "loading"
+if "loaded" not in st.session_state:
+    st.session_state.loaded = False
+if "answers" not in st.session_state:
+    st.session_state.answers = {}
+if "wishlist" not in st.session_state:
+    st.session_state.wishlist = []
 
 # ── Loading ──
 def loading_screen():
     if not st.session_state.loaded:
         st.markdown("""
-        <div class="card" style="text-align:center; padding:60px 44px;">
+        <div class="card" style="text-align:center; padding: 60px 44px;">
             <span class="hero-emoji">🎁</span>
             <h2 style="margin-bottom:10px;">Giftapper</h2>
             <p style="color:#A89880; font-size:15px;">Preparing your gift experience…</p>
@@ -302,26 +239,14 @@ def loading_screen():
 # ── Landing ──
 def landing_screen():
     st.markdown("""
-    <div class="card" style="text-align:center; padding:56px 44px;">
+    <div class="card" style="text-align:center; padding: 56px 44px;">
         <span class="hero-emoji">🎁</span>
         <h1 style="font-size:2rem; margin-bottom:12px;">Find the perfect gift</h1>
-        <p style="color:#A89880; font-size:16px; line-height:1.7; max-width:380px; margin:0 auto 8px;">
-            Answer a few questions and get AI-powered gift recommendations — instantly.
+        <p style="color:#A89880; font-size:16px; line-height:1.7; max-width:380px; margin:0 auto 28px;">
+            Answer 8 quick questions and get thoughtfully matched gift ideas — with links to buy instantly.
         </p>
-        <div class="ai-badge">✦ Powered by Claude AI</div>
     </div>
     """, unsafe_allow_html=True)
-
-    # API Key input
-    with st.expander("🔑 Enter your Anthropic API Key"):
-        st.session_state.api_key = st.text_input(
-            "API Key",
-            value=st.session_state.api_key,
-            type="password",
-            placeholder="sk-ant-...",
-            label_visibility="collapsed"
-        )
-        st.markdown("<p style='font-size:12px; color:#A89880;'>Get your key at console.anthropic.com — it's never stored.</p>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -336,12 +261,13 @@ def landing_screen():
 # ── Chat ──
 def chat_screen():
     a = st.session_state.answers
+
     fields = ["recipient", "closeness", "age_group", "occasion", "budget", "delivery", "type", "style"]
     filled = sum(1 for f in fields if a.get(f) and a.get(f) != "— select —")
     progress = int((filled / len(fields)) * 100)
 
     st.markdown(f"""
-    <div class="step-label">Tell us about the gift</div>
+    <div class="step-label">Step 1 of 1 — Tell us about the gift</div>
     <div class="progress-bar-bg">
         <div class="progress-bar-fill" style="width:{progress}%"></div>
     </div>
@@ -355,7 +281,7 @@ def chat_screen():
     a["age_group"] = st.selectbox("Their age group", ["— select —", "Kid (under 12)", "Teen (13–17)", "Young Adult (18–30)", "Adult (31–50)", "Senior (50+)"])
 
     st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    st.markdown("<h2 style='margin-bottom:24px;'>Occasion & budget</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom:24px;'>The occasion & budget</h2>", unsafe_allow_html=True)
 
     a["occasion"] = st.selectbox("Occasion", ["— select —", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Graduation", "Housewarming", "Just because", "Other"])
     a["budget"] = st.selectbox("Budget", ["— select —", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000–₹5000", "₹5000+"])
@@ -367,66 +293,75 @@ def chat_screen():
     a["type"] = st.selectbox("Gift type", ["— select —", "Decorative", "Usable", "Emotional", "Fun / Playful", "Educational"])
     a["style"] = st.selectbox("Aesthetic style", ["— select —", "Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"])
 
-    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
-    st.markdown("<h2 style='margin-bottom:12px;'>Anything extra? (optional)</h2>", unsafe_allow_html=True)
-    a["note"] = st.text_area(
-        "Personal note",
-        placeholder="e.g. She loves hiking and coffee, he's really into chess lately…",
-        label_visibility="collapsed",
-        height=90
-    )
-
     st.markdown('</div>', unsafe_allow_html=True)
 
-    all_answered = all(a.get(f) and a.get(f) != "— select —" for f in fields)
+    all_answered = all(
+        a.get(f) and a.get(f) != "— select —"
+        for f in fields
+    )
 
     if not all_answered:
         st.warning(f"⚑  {len(fields) - filled} question(s) remaining")
 
-    if not st.session_state.api_key:
-        st.warning("🔑 Add your Anthropic API key on the home screen to get AI recommendations.")
-
     col1, col2 = st.columns([2, 1])
     with col1:
-        ready = all_answered and bool(st.session_state.api_key)
-        if st.button("✦ Get AI Recommendations →", use_container_width=True, disabled=not ready):
-            st.session_state.page = "loading_ai"
+        if st.button("Get Recommendations →", use_container_width=True, disabled=not all_answered):
+            st.session_state.page = "result"
             st.rerun()
     with col2:
         if st.button("← Back", use_container_width=True):
             st.session_state.page = "landing"
             st.rerun()
 
-# ── AI Loading ──
-def ai_loading_screen():
-    st.markdown("""
-    <div class="card" style="text-align:center; padding:60px 44px;">
-        <span class="hero-emoji">✦</span>
-        <h2 style="margin-bottom:10px;">Finding your gifts…</h2>
-        <p style="color:#A89880; font-size:15px;">Claude is thinking of the perfect matches</p>
-    </div>
-    """, unsafe_allow_html=True)
+# ── Recommendations ──
+def generate_recommendations(a):
+    budget = a.get("budget")
+    style  = a.get("style")
+    delivery = a.get("delivery")
 
-    try:
-        recs = get_ai_recommendations(st.session_state.answers, st.session_state.api_key)
-        st.session_state.recommendations = recs
-        st.session_state.page = "result"
-        st.rerun()
-    except Exception as e:
-        st.error(f"Something went wrong: {str(e)}")
-        if st.button("← Try again"):
-            st.session_state.page = "chat"
-            st.rerun()
+    all_gifts = [
+        {"name": "Minimal Ceramic Mug", "reason": "Simple, useful, clutter-free — a daily reminder.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=minimal+ceramic+mug", "flipkart": "https://www.flipkart.com/search?q=minimal+ceramic+mug"},
+        {"name": "Single Photo Print", "reason": "A small but deeply meaningful keepsake.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=photo+print", "flipkart": "https://www.flipkart.com/search?q=photo+print"},
+        {"name": "Cute Keychain / Mini Plush", "reason": "Fun, light, and always affordable.", "price": "under ₹500", "style": "Cute", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=cute+keychain", "flipkart": "https://www.flipkart.com/search?q=cute+keychain"},
+        {"name": "Incense Sticks + Holder", "reason": "Culturally rooted and calming.", "price": "under ₹500", "style": "Traditional", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=incense+sticks+holder", "flipkart": "https://www.flipkart.com/search?q=incense+holder"},
+        {"name": "Spotify Premium Gift Card", "reason": "Music for every mood, delivered instantly.", "price": "under ₹500", "style": "Modern", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=spotify+gift+card", "flipkart": "https://www.flipkart.com/search?q=spotify+gift+card"},
+        {"name": "Framed Minimal Photo Print", "reason": "Clean design with deep emotional value.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=framed+photo+print", "flipkart": "https://www.flipkart.com/search?q=framed+photo+print"},
+        {"name": "Abstract Art Print", "reason": "Adds personality without being loud.", "price": "₹500–₹1000", "style": "Artistic", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=abstract+art+print", "flipkart": "https://www.flipkart.com/search?q=abstract+art+print"},
+        {"name": "Scented Candle Set", "reason": "Universally loved, instantly relaxing.", "price": "₹500–₹1000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=scented+candle+set", "flipkart": "https://www.flipkart.com/search?q=scented+candle+set"},
+        {"name": "Bohemian Wind Chime", "reason": "Adds charm and positive energy to any space.", "price": "₹500–₹1000", "style": "Bohemian", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=wind+chime", "flipkart": "https://www.flipkart.com/search?q=wind+chime"},
+        {"name": "Rustic Wooden Photo Frame", "reason": "Warm, timeless, and personal.", "price": "₹500–₹1000", "style": "Rustic", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=wooden+photo+frame", "flipkart": "https://www.flipkart.com/search?q=wooden+photo+frame"},
+        {"name": "Netflix / OTT Gift Card", "reason": "Entertainment they'll genuinely use.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=ott+gift+card", "flipkart": "https://www.flipkart.com/search?q=netflix+gift+card"},
+        {"name": "Amazon Gift Card", "reason": "They choose exactly what they want.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=amazon+gift+card", "flipkart": "https://www.flipkart.com/search?q=amazon+gift+card"},
+        {"name": "Movie Date Night Voucher", "reason": "Create a memory, not just a thing.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=bookmyshow+gift+card", "flipkart": "https://www.flipkart.com/search?q=movie+voucher"},
+        {"name": "Personalized Photo Frame Set", "reason": "Romantic, premium, and lasting.", "price": "₹1000–₹2000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=personalized+photo+frame", "flipkart": "https://www.flipkart.com/search?q=personalized+photo+frame"},
+        {"name": "Handmade Jewellery Box", "reason": "Elegant, personal, and heirloom-worthy.", "price": "₹1000–₹2000", "style": "Vintage", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=jewellery+box", "flipkart": "https://www.flipkart.com/search?q=jewellery+box"},
+        {"name": "Leather Wallet", "reason": "Classic, practical, and long-lasting.", "price": "₹1000–₹2000", "style": "Modern", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=leather+wallet", "flipkart": "https://www.flipkart.com/search?q=leather+wallet"},
+        {"name": "Online Course Voucher", "reason": "A gift that compounds — knowledge.", "price": "₹1000–₹2000", "style": "Minimal", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=udemy+gift+card", "flipkart": "https://www.flipkart.com/search?q=online+course+voucher"},
+        {"name": "Cooking / Art Class Voucher", "reason": "Fun, skill-building, unforgettable.", "price": "₹1000–₹2000", "style": "Artistic", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=art+class+voucher", "flipkart": "https://www.flipkart.com/search?q=cooking+class+voucher"},
+        {"name": "Customized Gift Box", "reason": "High-end, curated, and completely personal.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=customized+gift+box", "flipkart": "https://www.flipkart.com/search?q=customized+gift+box"},
+        {"name": "Spa / Wellness Voucher", "reason": "The gift of rest — truly luxurious.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=spa+gift+voucher", "flipkart": "https://www.flipkart.com/search?q=spa+voucher"},
+        {"name": "Premium Watch", "reason": "Timeless, sophisticated, and memorable.", "price": "₹5000+", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=premium+watch+gift", "flipkart": "https://www.flipkart.com/search?q=premium+watch"},
+        {"name": "Personalized Jewellery", "reason": "Wearable, deeply personal, forever meaningful.", "price": "₹5000+", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=personalized+jewellery", "flipkart": "https://www.flipkart.com/search?q=personalized+jewellery"},
+    ]
+
+    filtered = [g for g in all_gifts if g["price"] == budget and g["delivery"] == delivery]
+    style_match = [g for g in filtered if g["style"] == style]
+    results = style_match if style_match else filtered
+
+    return results[:3] if results else [
+        {"name": "Personalized Gift Card", "reason": "A flexible, thoughtful choice.", "price": budget, "style": style, "delivery": delivery, "amazon": "https://www.amazon.in/s?k=gift+card", "flipkart": "https://www.flipkart.com/search?q=gift+card"}
+    ]
 
 # ── Results ──
 def result_screen():
-    recs = st.session_state.recommendations
+    a = st.session_state.answers
+    recs = generate_recommendations(a)
 
     st.markdown("""
     <div style="text-align:center; margin-bottom:28px;">
         <span class="hero-emoji">✦</span>
-        <h1 style="margin-bottom:8px;">Your AI matches</h1>
-        <p style="color:#A89880; font-size:15px;">Handpicked by Claude just for you</p>
+        <h1 style="margin-bottom:8px;">Your matches</h1>
+        <p style="color:#A89880; font-size:15px;">Curated just for your answers</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -434,14 +369,11 @@ def result_screen():
         st.markdown(f"""
         <div class="card-sm">
             <div class="gift-number">{i+1}</div>
-            <h3 style="margin:0 0 6px; font-size:1.15rem;">{gift['name']}</h3>
-            <p style="color:#7A6A5E; font-size:14px; margin-bottom:8px; line-height:1.6;">{gift['reason']}</p>
-            <div class="why-box">💡 {gift.get('why', '')}</div>
-            <div style="margin-top:12px;">
-                <span class="tag">💰 {gift['price']}</span>
-                <span class="tag">🎨 {gift['style']}</span>
-                <span class="tag">📦 {gift['delivery']}</span>
-            </div>
+            <h3 style="margin: 0 0 6px; font-size:1.15rem;">{gift['name']}</h3>
+            <p style="color:#7A6A5E; font-size:14px; margin-bottom:12px; line-height:1.6;">{gift['reason']}</p>
+            <span class="tag">💰 {gift['price']}</span>
+            <span class="tag">🎨 {gift['style']}</span>
+            <span class="tag">📦 {gift['delivery']}</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -458,18 +390,13 @@ def result_screen():
                 st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
         if st.button("↺ Start over", use_container_width=True):
             st.session_state.page = "landing"
             st.session_state.answers = {}
-            st.session_state.recommendations = []
             st.rerun()
     with col2:
-        if st.button("✦ Regenerate", use_container_width=True):
-            st.session_state.page = "loading_ai"
-            st.rerun()
-    with col3:
         if st.button(f"❤ Wishlist ({len(st.session_state.wishlist)})", use_container_width=True):
             st.session_state.page = "wishlist"
             st.rerun()
@@ -487,20 +414,17 @@ def wishlist_screen():
     if not st.session_state.wishlist:
         st.markdown("""
         <div class="card" style="text-align:center; padding:48px;">
-            <p style="color:#A89880; font-size:15px;">Nothing saved yet — find some gifts first! 🎁</p>
+            <p style="color:#A89880; font-size:15px;">Nothing saved yet — go find some gifts! 🎁</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         for i, gift in enumerate(st.session_state.wishlist):
             st.markdown(f"""
             <div class="card-sm">
-                <h3 style="margin:0 0 6px; font-size:1.1rem;">{gift['name']}</h3>
-                <p style="color:#7A6A5E; font-size:14px; margin-bottom:8px;">{gift['reason']}</p>
-                {f'<div class="why-box">💡 {gift["why"]}</div>' if gift.get("why") else ""}
-                <div style="margin-top:10px;">
-                    <span class="tag">💰 {gift['price']}</span>
-                    <span class="tag">🎨 {gift['style']}</span>
-                </div>
+                <h3 style="margin: 0 0 6px; font-size:1.1rem;">{gift['name']}</h3>
+                <p style="color:#7A6A5E; font-size:14px; margin-bottom:10px;">{gift['reason']}</p>
+                <span class="tag">💰 {gift['price']}</span>
+                <span class="tag">🎨 {gift['style']}</span>
             </div>
             """, unsafe_allow_html=True)
 
@@ -532,8 +456,6 @@ elif st.session_state.page == "landing":
     landing_screen()
 elif st.session_state.page == "chat":
     chat_screen()
-elif st.session_state.page == "loading_ai":
-    ai_loading_screen()
 elif st.session_state.page == "result":
     result_screen()
 elif st.session_state.page == "wishlist":
