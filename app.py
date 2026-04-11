@@ -1,7 +1,8 @@
 import streamlit as st
+import time
 
 # -------------------------------------------------
-# PAGE CONFIG (MUST BE FIRST)
+# PAGE CONFIG
 # -------------------------------------------------
 st.set_page_config(
     page_title="Personalized Gift Finder",
@@ -10,99 +11,34 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# UI STYLING (STREAMLIT-SAFE + DEVICE CONSISTENT)
+# STYLING
 # -------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap');
-
 #MainMenu, footer, header {visibility: hidden;}
 
-/* FORCE LIGHT THEME EVERYWHERE */
-html, body, [class*="css"] {
-    color: #3A2F2F !important;
-    font-family: 'Cormorant Garamond', serif;
+html, body, .stApp {
+    background-color: #F6F1E9 !important;
+    font-family: 'Georgia', 'Times New Roman', serif !important;
 }
 
-/* APP BACKGROUND */
-.stApp {
-    background-color: #F6F1E9;
-}
-
-/* CONTAINER */
 .block-container {
     max-width: 720px;
     padding-top: 3rem;
 }
 
-/* HEADINGS – STRONG VISUAL HIERARCHY */
-h1 {
+h1, h2, h3 {
     color: #3A2F2F !important;
     text-align: center;
-    font-size: 44px !important;
-    font-weight: 600;
-    letter-spacing: 0.6px;
-    line-height: 1.2;
+    font-family: 'Georgia', serif !important;
 }
 
-h2 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-size: 32px !important;
-    font-weight: 500;
-    line-height: 1.3;
-}
-
-h3 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-size: 24px !important;
-    font-weight: 500;
-}
-/* HEADINGS – STRONG VISUAL HIERARCHY */
-h1 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-size: 44px !important;
-    font-weight: 600;
-    letter-spacing: 0.6px;
-    line-height: 1.2;
-}
-
-h2 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-size: 32px !important;
-    font-weight: 500;
-    line-height: 1.3;
-}
-
-h3 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-size: 24px !important;
-    font-weight: 500;
-}
-
-
-/* TEXT + LABELS */
-p, label, span {
+.stSelectbox label, .stTextInput label, p {
     color: #5B4F4F !important;
-    font-size: 17px;
+    font-size: 17px !important;
+    font-family: 'Georgia', serif !important;
 }
 
-/* INPUT TEXT */
-input, textarea, select {
-    color: #3A2F2F !important;
-    background-color: #FBF8F3 !important;
-}
-
-/* SELECTBOX LABEL FIX */
-.stSelectbox label {
-    color: #3A2F2F !important;
-}
-
-/* CARD */
 .card {
     background: #FBF8F3;
     border-radius: 18px;
@@ -111,33 +47,26 @@ input, textarea, select {
     margin-bottom: 30px;
 }
 
-/* BUTTON BASE */
-div.stButton > button {
-    border-radius: 26px;
-    padding: 0.9rem 1.4rem;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.25s ease-in-out;
+.stButton > button {
+    background-color: #3A2F2F !important;
+    color: #FBF8F3 !important;
+    border-radius: 28px !important;
+    padding: 0.8rem 1.4rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    width: 100%;
+    font-family: 'Georgia', serif !important;
 }
 
-/* ENABLED BUTTON */
-div.stButton > button:not([disabled]) {
-    background-color: #2E7D32;
-    color: white;
+.stButton > button:hover {
+    background-color: #2A2121 !important;
+    transform: scale(1.04);
 }
 
-/* HOVER */
-div.stButton > button:not([disabled]):hover {
-    background-color: #256628;
-    transform: scale(1.05);
-}
-
-/* DISABLED BUTTON */
-div.stButton > button[disabled] {
-    background-color: #BDB4AF;
-    color: white;
-    cursor: not-allowed;
-    opacity: 0.8;
+.stSelectbox > div > div {
+    background-color: #FBF8F3 !important;
+    border-color: #C9B99A !important;
+    color: #3A2F2F !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -146,64 +75,32 @@ div.stButton > button[disabled] {
 # SESSION STATE
 # -------------------------------------------------
 if "page" not in st.session_state:
-    st.session_state.page = "landing"
+    st.session_state.page = "loading"
+
+if "loaded" not in st.session_state:
+    st.session_state.loaded = False
 
 if "answers" not in st.session_state:
     st.session_state.answers = {}
 
 # -------------------------------------------------
-# GIFT DATABASE
+# LOADING SCREEN
 # -------------------------------------------------
-GIFTS = [
-    {
-        "name": "Minimal Ceramic Mug",
-        "budget": "under ₹500",
-        "style": ["Minimal"],
-        "type": ["Usable"],
-        "occasion": ["Birthday", "Just because"],
-        "recipient": ["Friend", "Partner", "Self"],
-        "reason": "Simple, useful, and clutter-free."
-    },
-    {
-        "name": "Single Photo Print",
-        "budget": "under ₹500",
-        "style": ["Minimal"],
-        "type": ["Emotional"],
-        "occasion": ["Memory / Keepsake"],
-        "recipient": ["Partner", "Parent"],
-        "reason": "A small but meaningful memory."
-    },
-    {
-        "name": "Framed Minimal Photo Print",
-        "budget": "₹500–₹1000",
-        "style": ["Minimal", "Luxury"],
-        "type": ["Emotional"],
-        "occasion": ["Birthday", "Anniversary"],
-        "recipient": ["Partner", "Friend", "Parent"],
-        "reason": "Clean design with emotional value."
-    }
-]
+def loading_screen():
+    if not st.session_state.loaded:
+        st.markdown("""
+        <div class="card" style="text-align:center;">
+            <div style="font-size:64px;">🎁</div>
+            <h2>Preparing your gift experience</h2>
+            <p>Thoughtful things take a moment…</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-# -------------------------------------------------
-# SCORING ENGINE
-# -------------------------------------------------
-def generate_recommendation(answers):
-    best_score = -1
-    best_gift = None
+        time.sleep(1.5)
 
-    for gift in GIFTS:
-        score = 0
-        if answers["budget"] == gift["budget"]: score += 4
-        if answers["style"] in gift["style"]: score += 3
-        if answers["type"] in gift["type"]: score += 3
-        if answers["occasion"] in gift["occasion"]: score += 2
-        if answers["recipient"] in gift["recipient"]: score += 2
-
-        if score > best_score:
-            best_score = score
-            best_gift = gift
-
-    return best_gift["name"], best_gift["reason"]
+        st.session_state.loaded = True
+        st.session_state.page = "landing"
+        st.rerun()
 
 # -------------------------------------------------
 # LANDING SCREEN
@@ -220,71 +117,109 @@ def landing_screen():
 
     if st.button("🎁 Find a Personalized Gift", use_container_width=True):
         st.session_state.page = "chat"
+        st.rerun()
 
 # -------------------------------------------------
 # CHAT SCREEN
 # -------------------------------------------------
 def chat_screen():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.header("Let’s find the right gift")
+    st.header("Let's find the right gift")
 
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox("Who is this gift for?",
-        ["Select one", "Partner", "Friend", "Parent", "Self"])
+    a["recipient"] = st.selectbox(
+        "Who is this gift for?",
+        ["Partner", "Friend", "Parent", "Pet", "Self"]
+    )
 
-    a["occasion"] = st.selectbox("What’s the occasion?",
-        ["Select one", "Birthday", "Anniversary", "Memory / Keepsake", "Just because"])
+    a["occasion"] = st.selectbox(
+        "What's the occasion?",
+        ["Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Just because", "Other"]
+    )
 
-    a["budget"] = st.selectbox("Your budget range?",
-        ["Select one", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"])
+    a["budget"] = st.selectbox(
+        "Your budget range?",
+        ["under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000+"]
+    )
 
-    a["type"] = st.selectbox("What kind of gift feels right?",
-        ["Select one", "Decorative", "Usable", "Emotional"])
+    a["type"] = st.selectbox(
+        "What kind of gift feels right?",
+        ["Decorative", "Usable", "Emotional"]
+    )
 
-    a["style"] = st.selectbox("Preferred style?",
-        ["Select one", "Minimal", "Luxury", "Artistic", "Vintage", "Modern"])
+    a["style"] = st.selectbox(
+        "Preferred style?",
+        ["Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
+    )
 
-    filled = sum(v != "Select one" for v in a.values())
-    total = 5
-    all_selected = filled == total
-
-    st.progress(filled / total)
-
-    if st.button("Get My Recommendation",
-                 use_container_width=True,
-                 disabled=not all_selected):
+    if st.button("Get Recommendation ✨", use_container_width=True):
         st.session_state.page = "result"
+        st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+# -------------------------------------------------
+# RECOMMENDATION LOGIC
+# -------------------------------------------------
+def generate_recommendation(budget, style, occasion, recipient):
+
+    if budget == "under ₹500":
+        if style == "Minimal":
+            if occasion in ["Birthday", "Just because"]:
+                return "Minimal Ceramic Mug", "Simple, useful, and clutter-free."
+            if occasion == "Memory / Keepsake":
+                return "Single Photo Print", "A small but meaningful memory."
+        if style == "Cute" and recipient in ["Friend", "Partner"]:
+            return "Cute Keychain or Mini Plush", "Fun, light, and affordable."
+        if style == "Traditional":
+            return "Incense Sticks + Holder", "Culturally meaningful and calming."
+
+    elif budget == "₹500–₹1000":
+        if style == "Minimal":
+            return "Framed Minimal Photo Print", "Clean design with emotional value."
+        if style == "Artistic":
+            return "Abstract Art Print", "Adds personality without being loud."
+
+    elif budget == "₹1000–₹2000":
+        if style == "Luxury":
+            return "Personalized Photo Frame Set", "Romantic and premium."
+
+    elif budget == "₹2000+":
+        return "Customized Gift Box", "High-end, curated experience."
+
+    return "Personalized Gift Card", "A flexible choice when preferences vary."
 
 # -------------------------------------------------
 # RESULT SCREEN
 # -------------------------------------------------
 def result_screen():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.header("Your Personalized Gift 🎁")
+    a = st.session_state.answers
 
-    gift_name, gift_reason = generate_recommendation(st.session_state.answers)
+    product, reason = generate_recommendation(
+        a["budget"], a["style"], a["occasion"], a["recipient"]
+    )
 
     st.markdown(f"""
-    <p style="text-align:center; font-size:20px; font-weight:bold;">
-        {gift_name}
-    </p>
-    <p style="text-align:center;">
-        {gift_reason}
-    </p>
+    <div class="card" style="text-align:center;">
+        <div style="font-size:56px;">🎁</div>
+        <h2>Your Personalized Gift</h2>
+        <h3>{product}</h3>
+        <p style="margin-top:12px;">{reason}</p>
+    </div>
     """, unsafe_allow_html=True)
 
-    if st.button("← Find Another Gift", use_container_width=True):
-        st.session_state.page = "chat"
-
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.button("🔄 Start Over", use_container_width=True):
+        st.session_state.page = "landing"
+        st.session_state.answers = {}
+        st.rerun()
 
 # -------------------------------------------------
 # ROUTER
 # -------------------------------------------------
-if st.session_state.page == "landing":
+if st.session_state.page == "loading":
+    loading_screen()
+elif st.session_state.page == "landing":
     landing_screen()
 elif st.session_state.page == "chat":
     chat_screen()
