@@ -459,4 +459,4 @@ elif st.session_state.page == "chat":
 elif st.session_state.page == "result":
     result_screen()
 elif st.session_state.page == "wishlist":
-    wishlist_screen()e
+    wishlist_screen()
