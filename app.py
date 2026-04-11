@@ -1,105 +1,217 @@
 import streamlit as st
 import time
 
-# -------------------------------------------------
-# PAGE CONFIG
-# -------------------------------------------------
 st.set_page_config(
-    page_title="Personalized Gift Finder",
+    page_title="Giftapper",
     page_icon="🎁",
     layout="centered"
 )
 
-# -------------------------------------------------
-# STYLING
-# -------------------------------------------------
 st.markdown("""
 <style>
-#MainMenu, footer, header {visibility: hidden;}
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+#MainMenu, footer, header { visibility: hidden; }
 
 html, body, .stApp {
-    background-color: #F6F1E9 !important;
-    font-family: 'Georgia', 'Times New Roman', serif !important;
+    background-color: #FDFAF5 !important;
+    font-family: 'DM Sans', sans-serif !important;
 }
 
 .block-container {
-    max-width: 720px;
-    padding-top: 3rem;
+    max-width: 680px !important;
+    padding-top: 2.5rem !important;
+    padding-bottom: 3rem !important;
 }
 
+/* ── Typography ── */
 h1, h2, h3 {
-    color: #3A2F2F !important;
-    text-align: center;
-    font-family: 'Georgia', serif !important;
+    font-family: 'DM Serif Display', serif !important;
+    color: #1C1510 !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.3px;
 }
 
-.stSelectbox label, .stTextInput label, p {
-    color: #5B4F4F !important;
-    font-size: 17px !important;
-    font-family: 'Georgia', serif !important;
+p, li, label, div {
+    font-family: 'DM Sans', sans-serif !important;
+    color: #4A3F35 !important;
 }
 
+/* ── Cards ── */
 .card {
-    background: #FBF8F3;
-    border-radius: 18px;
-    padding: 36px;
-    box-shadow: 0 18px 35px rgba(0,0,0,0.06);
-    margin-bottom: 30px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 40px 44px;
+    border: 1px solid #EDE8DF;
+    margin-bottom: 20px;
 }
 
-.stButton > button {
-    background-color: #3A2F2F !important;
-    color: #FBF8F3 !important;
-    border-radius: 28px !important;
-    padding: 0.8rem 1.4rem !important;
-    font-size: 16px !important;
-    border: none !important;
-    width: 100%;
-    font-family: 'Georgia', serif !important;
+.card-sm {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid #EDE8DF;
+    margin-bottom: 14px;
+    transition: box-shadow 0.2s ease;
 }
 
-.stButton > button:hover {
-    background-color: #2A2121 !important;
-    transform: scale(1.04);
+.card-sm:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
 }
 
-.stButton > button:disabled {
-    background-color: #C9B99A !important;
-    color: #F6F1E9 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-}
-
-.stSelectbox > div > div {
-    background-color: #FBF8F3 !important;
-    border-color: #C9B99A !important;
-    color: #3A2F2F !important;
-}
-
-.gift-card {
-    background: #FBF8F3;
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    margin-bottom: 16px;
-    border-left: 4px solid #3A2F2F;
+.gift-number {
+    display: inline-block;
+    background: #1C1510;
+    color: #FDFAF5 !important;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
 .tag {
     display: inline-block;
-    background-color: #3A2F2F;
-    color: #FBF8F3;
-    border-radius: 20px;
-    padding: 3px 12px;
-    font-size: 13px;
-    margin: 4px 2px;
+    background: #F3EEE6;
+    color: #6B5A4E !important;
+    border-radius: 30px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 3px 3px 3px 0;
+    letter-spacing: 0.2px;
+}
+
+.progress-bar-bg {
+    background: #EDE8DF;
+    border-radius: 10px;
+    height: 4px;
+    margin-bottom: 28px;
+}
+
+.progress-bar-fill {
+    background: #1C1510;
+    border-radius: 10px;
+    height: 4px;
+    transition: width 0.4s ease;
+}
+
+.step-label {
+    font-size: 12px;
+    color: #A89880 !important;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.hero-emoji {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #EDE8DF;
+    margin: 20px 0;
+}
+
+/* ── Buttons ── */
+.stButton > button {
+    background-color: #1C1510 !important;
+    color: #FDFAF5 !important;
+    border-radius: 50px !important;
+    padding: 0.75rem 1.6rem !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    font-family: 'DM Sans', sans-serif !important;
+    letter-spacing: 0.2px !important;
+    transition: opacity 0.2s ease, transform 0.15s ease !important;
+}
+
+.stButton > button:hover {
+    opacity: 0.85 !important;
+    transform: translateY(-1px) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0px) !important;
+}
+
+.stButton > button:disabled {
+    background-color: #D6CEBF !important;
+    color: #A89880 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+/* ── Secondary button ── */
+div[data-testid="column"]:last-child .stButton > button,
+.btn-secondary .stButton > button {
+    background-color: transparent !important;
+    color: #1C1510 !important;
+    border: 1.5px solid #1C1510 !important;
+}
+
+div[data-testid="column"]:last-child .stButton > button:hover {
+    background-color: #F3EEE6 !important;
+    opacity: 1 !important;
+}
+
+/* ── Selects ── */
+.stSelectbox label {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #1C1510 !important;
+    margin-bottom: 4px !important;
+}
+
+.stSelectbox > div > div {
+    background-color: #F9F6F0 !important;
+    border: 1.5px solid #EDE8DF !important;
+    border-radius: 12px !important;
+    color: #1C1510 !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+.stSelectbox > div > div:focus-within {
+    border-color: #1C1510 !important;
+}
+
+/* ── Warning ── */
+.stAlert {
+    border-radius: 12px !important;
+    border: none !important;
+    background: #FDF3E3 !important;
+    color: #7A5C2E !important;
+}
+
+/* ── Link buttons ── */
+.stLinkButton > a {
+    background-color: #F3EEE6 !important;
+    color: #1C1510 !important;
+    border-radius: 50px !important;
+    padding: 0.55rem 1rem !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    font-family: 'DM Sans', sans-serif !important;
+    text-decoration: none !important;
+    transition: background 0.2s ease !important;
+}
+
+.stLinkButton > a:hover {
+    background-color: #E8E0D3 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------
-# SESSION STATE
-# -------------------------------------------------
+# ── Session State ──
 if "page" not in st.session_state:
     st.session_state.page = "loading"
 if "loaded" not in st.session_state:
@@ -109,16 +221,14 @@ if "answers" not in st.session_state:
 if "wishlist" not in st.session_state:
     st.session_state.wishlist = []
 
-# -------------------------------------------------
-# LOADING SCREEN
-# -------------------------------------------------
+# ── Loading ──
 def loading_screen():
     if not st.session_state.loaded:
         st.markdown("""
-        <div class="card" style="text-align:center;">
-            <div style="font-size:64px;">🎁</div>
-            <h2>Preparing your gift experience</h2>
-            <p>Thoughtful things take a moment…</p>
+        <div class="card" style="text-align:center; padding: 60px 44px;">
+            <span class="hero-emoji">🎁</span>
+            <h2 style="margin-bottom:10px;">Giftapper</h2>
+            <p style="color:#A89880; font-size:15px;">Preparing your gift experience…</p>
         </div>
         """, unsafe_allow_html=True)
         time.sleep(1.5)
@@ -126,168 +236,141 @@ def loading_screen():
         st.session_state.page = "landing"
         st.rerun()
 
-# -------------------------------------------------
-# LANDING SCREEN
-# -------------------------------------------------
+# ── Landing ──
 def landing_screen():
     st.markdown("""
-    <div class="card">
-        <h1>Find the Perfect Personalized Gift 🎁</h1>
-        <p style="text-align:center;">
-            Answer a few questions. Get matched in under 2 minutes.
+    <div class="card" style="text-align:center; padding: 56px 44px;">
+        <span class="hero-emoji">🎁</span>
+        <h1 style="font-size:2rem; margin-bottom:12px;">Find the perfect gift</h1>
+        <p style="color:#A89880; font-size:16px; line-height:1.7; max-width:380px; margin:0 auto 28px;">
+            Answer 8 quick questions and get thoughtfully matched gift ideas — with links to buy instantly.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🎁 Find a Gift", use_container_width=True):
+        if st.button("✦ Find a Gift", use_container_width=True):
             st.session_state.page = "chat"
             st.rerun()
     with col2:
-        if st.button("❤️ My Wishlist", use_container_width=True):
+        if st.button(f"❤ Wishlist ({len(st.session_state.wishlist)})", use_container_width=True):
             st.session_state.page = "wishlist"
             st.rerun()
 
-# -------------------------------------------------
-# CHAT SCREEN
-# -------------------------------------------------
+# ── Chat ──
 def chat_screen():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.header("Let's find the right gift")
-
     a = st.session_state.answers
 
-    a["recipient"] = st.selectbox(
-        "Who is this gift for?",
-        ["-- Select --", "Partner", "Friend", "Parent", "Sibling", "Colleague", "Pet", "Self"]
-    )
+    fields = ["recipient", "closeness", "age_group", "occasion", "budget", "delivery", "type", "style"]
+    filled = sum(1 for f in fields if a.get(f) and a.get(f) != "— select —")
+    progress = int((filled / len(fields)) * 100)
 
-    a["closeness"] = st.selectbox(
-        "How close are you to them?",
-        ["-- Select --", "Very close", "Close friend", "Acquaintance", "Formal / Professional"]
-    )
-
-    a["age_group"] = st.selectbox(
-        "What is their age group?",
-        ["-- Select --", "Kid (under 12)", "Teen (13–17)", "Young Adult (18–30)", "Adult (31–50)", "Senior (50+)"]
-    )
-
-    a["occasion"] = st.selectbox(
-        "What's the occasion?",
-        ["-- Select --", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Graduation", "Housewarming", "Just because", "Other"]
-    )
-
-    a["budget"] = st.selectbox(
-        "Your budget range?",
-        ["-- Select --", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000–₹5000", "₹5000+"]
-    )
-
-    a["delivery"] = st.selectbox(
-        "How do you want to give it?",
-        ["-- Select --", "Physical gift", "Digital / Online", "Experience / Activity"]
-    )
-
-    a["type"] = st.selectbox(
-        "What kind of gift feels right?",
-        ["-- Select --", "Decorative", "Usable", "Emotional", "Fun / Playful", "Educational"]
-    )
-
-    a["style"] = st.selectbox(
-        "Preferred style?",
-        ["-- Select --", "Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"]
-    )
-
-    # BOOLEAN CHECK
-    all_answered = all(
-        v != "-- Select --" and v != "" and v is not None
-        for v in [
-            a.get("recipient"), a.get("closeness"), a.get("age_group"),
-            a.get("occasion"), a.get("budget"), a.get("delivery"),
-            a.get("type"), a.get("style")
-        ]
-    )
-
-    if not all_answered:
-        st.warning("⚠️ Please answer all questions to continue.")
-
-    if st.button("Get Recommendations ✨", use_container_width=True, disabled=not all_answered):
-        st.session_state.page = "result"
-        st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# -------------------------------------------------
-# RECOMMENDATION LOGIC — returns list of dicts
-# -------------------------------------------------
-def generate_recommendations(a):
-    budget   = a.get("budget")
-    style    = a.get("style")
-    occasion = a.get("occasion")
-    recipient= a.get("recipient")
-    age      = a.get("age_group")
-    delivery = a.get("delivery")
-    closeness= a.get("closeness")
-    gtype    = a.get("type")
-
-    all_gifts = [
-        # Physical / Usable
-        {"name": "Minimal Ceramic Mug", "reason": "Simple, useful, and clutter-free.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=minimal+ceramic+mug", "amazon": "https://www.amazon.in/s?k=minimal+ceramic+mug"},
-        {"name": "Single Photo Print", "reason": "A small but meaningful memory.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=photo+print", "amazon": "https://www.amazon.in/s?k=photo+print"},
-        {"name": "Cute Keychain or Mini Plush", "reason": "Fun, light, and affordable.", "price": "under ₹500", "style": "Cute", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=cute+keychain", "amazon": "https://www.amazon.in/s?k=cute+keychain"},
-        {"name": "Incense Sticks + Holder", "reason": "Culturally meaningful and calming.", "price": "under ₹500", "style": "Traditional", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=incense+sticks+holder", "amazon": "https://www.amazon.in/s?k=incense+sticks+holder"},
-        {"name": "Framed Minimal Photo Print", "reason": "Clean design with emotional value.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=framed+photo+print", "amazon": "https://www.amazon.in/s?k=framed+photo+print"},
-        {"name": "Abstract Art Print", "reason": "Adds personality without being loud.", "price": "₹500–₹1000", "style": "Artistic", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=abstract+art+print", "amazon": "https://www.amazon.in/s?k=abstract+art+print"},
-        {"name": "Scented Candle Set", "reason": "Relaxing and universally loved.", "price": "₹500–₹1000", "style": "Luxury", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=scented+candle+set", "amazon": "https://www.amazon.in/s?k=scented+candle+set"},
-        {"name": "Personalized Photo Frame Set", "reason": "Romantic and premium.", "price": "₹1000–₹2000", "style": "Luxury", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=personalized+photo+frame", "amazon": "https://www.amazon.in/s?k=personalized+photo+frame"},
-        {"name": "Handmade Jewellery Box", "reason": "Elegant and personal.", "price": "₹1000–₹2000", "style": "Vintage", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=handmade+jewellery+box", "amazon": "https://www.amazon.in/s?k=handmade+jewellery+box"},
-        {"name": "Customized Gift Box", "reason": "High-end, curated experience.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=customized+gift+box", "amazon": "https://www.amazon.in/s?k=customized+gift+box"},
-        {"name": "Leather Wallet", "reason": "Classic and practical for any adult.", "price": "₹1000–₹2000", "style": "Modern", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=leather+wallet", "amazon": "https://www.amazon.in/s?k=leather+wallet"},
-        {"name": "Bohemian Wind Chime", "reason": "Adds charm and positive energy.", "price": "₹500–₹1000", "style": "Bohemian", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=bohemian+wind+chime", "amazon": "https://www.amazon.in/s?k=bohemian+wind+chime"},
-        {"name": "Rustic Wooden Photo Frame", "reason": "Warm, timeless, and personal.", "price": "₹500–₹1000", "style": "Rustic", "delivery": "Physical gift", "flipkart": "https://www.flipkart.com/search?q=rustic+wooden+photo+frame", "amazon": "https://www.amazon.in/s?k=rustic+wooden+photo+frame"},
-        # Digital
-        {"name": "Netflix / OTT Gift Card", "reason": "Entertainment they'll actually use.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Digital / Online", "flipkart": "https://www.flipkart.com/search?q=netflix+gift+card", "amazon": "https://www.amazon.in/s?k=netflix+gift+card"},
-        {"name": "Online Course Voucher", "reason": "A gift that keeps giving — knowledge.", "price": "₹1000–₹2000", "style": "Minimal", "delivery": "Digital / Online", "flipkart": "https://www.flipkart.com/search?q=online+course+voucher", "amazon": "https://www.amazon.in/s?k=udemy+gift+card"},
-        {"name": "Spotify Premium Gift Card", "reason": "Music for every mood.", "price": "under ₹500", "style": "Modern", "delivery": "Digital / Online", "flipkart": "https://www.flipkart.com/search?q=spotify+gift+card", "amazon": "https://www.amazon.in/s?k=spotify+gift+card"},
-        {"name": "Amazon Gift Card", "reason": "They pick exactly what they want.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Digital / Online", "flipkart": "https://www.flipkart.com/search?q=amazon+gift+card", "amazon": "https://www.amazon.in/s?k=amazon+gift+card"},
-        # Experience
-        {"name": "Spa / Wellness Voucher", "reason": "A relaxing experience they deserve.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Experience / Activity", "flipkart": "https://www.flipkart.com/search?q=spa+voucher", "amazon": "https://www.amazon.in/s?k=spa+gift+voucher"},
-        {"name": "Movie Date Night Voucher", "reason": "Create a memory, not just a thing.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Experience / Activity", "flipkart": "https://www.flipkart.com/search?q=movie+voucher", "amazon": "https://www.amazon.in/s?k=bookmyshow+gift+card"},
-        {"name": "Cooking / Art Class Voucher", "reason": "Fun, skill-building, and memorable.", "price": "₹1000–₹2000", "style": "Artistic", "delivery": "Experience / Activity", "flipkart": "https://www.flipkart.com/search?q=cooking+class+voucher", "amazon": "https://www.amazon.in/s?k=art+class+gift+voucher"},
-    ]
-
-    # Filter by budget and delivery type first
-    filtered = [g for g in all_gifts if g["price"] == budget and g["delivery"] == delivery]
-
-    # Then try to match style
-    style_match = [g for g in filtered if g["style"] == style]
-
-    # Return style matches if found, otherwise return all filtered, limit to 3
-    results = style_match if style_match else filtered
-    return results[:3] if results else [
-        {"name": "Personalized Gift Card", "reason": "A flexible choice when preferences vary.", "price": budget, "style": style, "delivery": delivery, "flipkart": "https://www.flipkart.com/search?q=gift+card", "amazon": "https://www.amazon.in/s?k=gift+card"}
-    ]
-
-# -------------------------------------------------
-# RESULT SCREEN
-# -------------------------------------------------
-def result_screen():
-    a = st.session_state.answers
-    recommendations = generate_recommendations(a)
-
-    st.markdown("""
-    <div class="card" style="text-align:center;">
-        <div style="font-size:48px;">🎁</div>
-        <h2>Your Gift Recommendations</h2>
-        <p>Based on your answers, here are the best matches:</p>
+    st.markdown(f"""
+    <div class="step-label">Step 1 of 1 — Tell us about the gift</div>
+    <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width:{progress}%"></div>
     </div>
     """, unsafe_allow_html=True)
 
-    for i, gift in enumerate(recommendations):
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom:24px;'>Who is this for?</h2>", unsafe_allow_html=True)
+
+    a["recipient"] = st.selectbox("Recipient", ["— select —", "Partner", "Friend", "Parent", "Sibling", "Colleague", "Pet", "Self"])
+    a["closeness"] = st.selectbox("How close are you?", ["— select —", "Very close", "Close friend", "Acquaintance", "Formal / Professional"])
+    a["age_group"] = st.selectbox("Their age group", ["— select —", "Kid (under 12)", "Teen (13–17)", "Young Adult (18–30)", "Adult (31–50)", "Senior (50+)"])
+
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom:24px;'>The occasion & budget</h2>", unsafe_allow_html=True)
+
+    a["occasion"] = st.selectbox("Occasion", ["— select —", "Birthday", "Anniversary", "Memory / Keepsake", "Festival", "Graduation", "Housewarming", "Just because", "Other"])
+    a["budget"] = st.selectbox("Budget", ["— select —", "under ₹500", "₹500–₹1000", "₹1000–₹2000", "₹2000–₹5000", "₹5000+"])
+    a["delivery"] = st.selectbox("How to give it?", ["— select —", "Physical gift", "Digital / Online", "Experience / Activity"])
+
+    st.markdown("<hr class='divider'>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom:24px;'>Style & vibe</h2>", unsafe_allow_html=True)
+
+    a["type"] = st.selectbox("Gift type", ["— select —", "Decorative", "Usable", "Emotional", "Fun / Playful", "Educational"])
+    a["style"] = st.selectbox("Aesthetic style", ["— select —", "Minimal", "Artistic", "Cute", "Luxury", "Modern", "Vintage", "Bohemian", "Rustic", "Traditional"])
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    all_answered = all(
+        a.get(f) and a.get(f) != "— select —"
+        for f in fields
+    )
+
+    if not all_answered:
+        st.warning(f"⚑  {len(fields) - filled} question(s) remaining")
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        if st.button("Get Recommendations →", use_container_width=True, disabled=not all_answered):
+            st.session_state.page = "result"
+            st.rerun()
+    with col2:
+        if st.button("← Back", use_container_width=True):
+            st.session_state.page = "landing"
+            st.rerun()
+
+# ── Recommendations ──
+def generate_recommendations(a):
+    budget = a.get("budget")
+    style  = a.get("style")
+    delivery = a.get("delivery")
+
+    all_gifts = [
+        {"name": "Minimal Ceramic Mug", "reason": "Simple, useful, clutter-free — a daily reminder.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=minimal+ceramic+mug", "flipkart": "https://www.flipkart.com/search?q=minimal+ceramic+mug"},
+        {"name": "Single Photo Print", "reason": "A small but deeply meaningful keepsake.", "price": "under ₹500", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=photo+print", "flipkart": "https://www.flipkart.com/search?q=photo+print"},
+        {"name": "Cute Keychain / Mini Plush", "reason": "Fun, light, and always affordable.", "price": "under ₹500", "style": "Cute", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=cute+keychain", "flipkart": "https://www.flipkart.com/search?q=cute+keychain"},
+        {"name": "Incense Sticks + Holder", "reason": "Culturally rooted and calming.", "price": "under ₹500", "style": "Traditional", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=incense+sticks+holder", "flipkart": "https://www.flipkart.com/search?q=incense+holder"},
+        {"name": "Spotify Premium Gift Card", "reason": "Music for every mood, delivered instantly.", "price": "under ₹500", "style": "Modern", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=spotify+gift+card", "flipkart": "https://www.flipkart.com/search?q=spotify+gift+card"},
+        {"name": "Framed Minimal Photo Print", "reason": "Clean design with deep emotional value.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=framed+photo+print", "flipkart": "https://www.flipkart.com/search?q=framed+photo+print"},
+        {"name": "Abstract Art Print", "reason": "Adds personality without being loud.", "price": "₹500–₹1000", "style": "Artistic", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=abstract+art+print", "flipkart": "https://www.flipkart.com/search?q=abstract+art+print"},
+        {"name": "Scented Candle Set", "reason": "Universally loved, instantly relaxing.", "price": "₹500–₹1000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=scented+candle+set", "flipkart": "https://www.flipkart.com/search?q=scented+candle+set"},
+        {"name": "Bohemian Wind Chime", "reason": "Adds charm and positive energy to any space.", "price": "₹500–₹1000", "style": "Bohemian", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=wind+chime", "flipkart": "https://www.flipkart.com/search?q=wind+chime"},
+        {"name": "Rustic Wooden Photo Frame", "reason": "Warm, timeless, and personal.", "price": "₹500–₹1000", "style": "Rustic", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=wooden+photo+frame", "flipkart": "https://www.flipkart.com/search?q=wooden+photo+frame"},
+        {"name": "Netflix / OTT Gift Card", "reason": "Entertainment they'll genuinely use.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=ott+gift+card", "flipkart": "https://www.flipkart.com/search?q=netflix+gift+card"},
+        {"name": "Amazon Gift Card", "reason": "They choose exactly what they want.", "price": "₹500–₹1000", "style": "Minimal", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=amazon+gift+card", "flipkart": "https://www.flipkart.com/search?q=amazon+gift+card"},
+        {"name": "Movie Date Night Voucher", "reason": "Create a memory, not just a thing.", "price": "₹500–₹1000", "style": "Modern", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=bookmyshow+gift+card", "flipkart": "https://www.flipkart.com/search?q=movie+voucher"},
+        {"name": "Personalized Photo Frame Set", "reason": "Romantic, premium, and lasting.", "price": "₹1000–₹2000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=personalized+photo+frame", "flipkart": "https://www.flipkart.com/search?q=personalized+photo+frame"},
+        {"name": "Handmade Jewellery Box", "reason": "Elegant, personal, and heirloom-worthy.", "price": "₹1000–₹2000", "style": "Vintage", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=jewellery+box", "flipkart": "https://www.flipkart.com/search?q=jewellery+box"},
+        {"name": "Leather Wallet", "reason": "Classic, practical, and long-lasting.", "price": "₹1000–₹2000", "style": "Modern", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=leather+wallet", "flipkart": "https://www.flipkart.com/search?q=leather+wallet"},
+        {"name": "Online Course Voucher", "reason": "A gift that compounds — knowledge.", "price": "₹1000–₹2000", "style": "Minimal", "delivery": "Digital / Online", "amazon": "https://www.amazon.in/s?k=udemy+gift+card", "flipkart": "https://www.flipkart.com/search?q=online+course+voucher"},
+        {"name": "Cooking / Art Class Voucher", "reason": "Fun, skill-building, unforgettable.", "price": "₹1000–₹2000", "style": "Artistic", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=art+class+voucher", "flipkart": "https://www.flipkart.com/search?q=cooking+class+voucher"},
+        {"name": "Customized Gift Box", "reason": "High-end, curated, and completely personal.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=customized+gift+box", "flipkart": "https://www.flipkart.com/search?q=customized+gift+box"},
+        {"name": "Spa / Wellness Voucher", "reason": "The gift of rest — truly luxurious.", "price": "₹2000–₹5000", "style": "Luxury", "delivery": "Experience / Activity", "amazon": "https://www.amazon.in/s?k=spa+gift+voucher", "flipkart": "https://www.flipkart.com/search?q=spa+voucher"},
+        {"name": "Premium Watch", "reason": "Timeless, sophisticated, and memorable.", "price": "₹5000+", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=premium+watch+gift", "flipkart": "https://www.flipkart.com/search?q=premium+watch"},
+        {"name": "Personalized Jewellery", "reason": "Wearable, deeply personal, forever meaningful.", "price": "₹5000+", "style": "Luxury", "delivery": "Physical gift", "amazon": "https://www.amazon.in/s?k=personalized+jewellery", "flipkart": "https://www.flipkart.com/search?q=personalized+jewellery"},
+    ]
+
+    filtered = [g for g in all_gifts if g["price"] == budget and g["delivery"] == delivery]
+    style_match = [g for g in filtered if g["style"] == style]
+    results = style_match if style_match else filtered
+
+    return results[:3] if results else [
+        {"name": "Personalized Gift Card", "reason": "A flexible, thoughtful choice.", "price": budget, "style": style, "delivery": delivery, "amazon": "https://www.amazon.in/s?k=gift+card", "flipkart": "https://www.flipkart.com/search?q=gift+card"}
+    ]
+
+# ── Results ──
+def result_screen():
+    a = st.session_state.answers
+    recs = generate_recommendations(a)
+
+    st.markdown("""
+    <div style="text-align:center; margin-bottom:28px;">
+        <span class="hero-emoji">✦</span>
+        <h1 style="margin-bottom:8px;">Your matches</h1>
+        <p style="color:#A89880; font-size:15px;">Curated just for your answers</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    for i, gift in enumerate(recs):
         st.markdown(f"""
-        <div class="gift-card">
-            <h3 style="text-align:left; margin-bottom:8px;">🎀 {gift['name']}</h3>
-            <p style="margin-bottom:10px;">{gift['reason']}</p>
+        <div class="card-sm">
+            <div class="gift-number">{i+1}</div>
+            <h3 style="margin: 0 0 6px; font-size:1.15rem;">{gift['name']}</h3>
+            <p style="color:#7A6A5E; font-size:14px; margin-bottom:12px; line-height:1.6;">{gift['reason']}</p>
             <span class="tag">💰 {gift['price']}</span>
             <span class="tag">🎨 {gift['style']}</span>
             <span class="tag">📦 {gift['delivery']}</span>
@@ -298,53 +381,50 @@ def result_screen():
         with col1:
             st.link_button("🛒 Amazon", gift["amazon"], use_container_width=True)
         with col2:
-            st.link_button("🛍️ Flipkart", gift["flipkart"], use_container_width=True)
+            st.link_button("🛍 Flipkart", gift["flipkart"], use_container_width=True)
         with col3:
-            if st.button(f"❤️ Save", key=f"save_{i}", use_container_width=True):
-                if gift["name"] not in [w["name"] for w in st.session_state.wishlist]:
-                    st.session_state.wishlist.append(gift)
-                    st.success(f"Added to wishlist!")
-                else:
-                    st.info("Already in wishlist!")
+            already_saved = gift["name"] in [w["name"] for w in st.session_state.wishlist]
+            label = "✓ Saved" if already_saved else "❤ Save"
+            if st.button(label, key=f"save_{i}", use_container_width=True, disabled=already_saved):
+                st.session_state.wishlist.append(gift)
+                st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🔄 Start Over", use_container_width=True):
+        if st.button("↺ Start over", use_container_width=True):
             st.session_state.page = "landing"
             st.session_state.answers = {}
             st.rerun()
     with col2:
-        if st.button("❤️ View Wishlist", use_container_width=True):
+        if st.button(f"❤ Wishlist ({len(st.session_state.wishlist)})", use_container_width=True):
             st.session_state.page = "wishlist"
             st.rerun()
 
-# -------------------------------------------------
-# WISHLIST SCREEN
-# -------------------------------------------------
+# ── Wishlist ──
 def wishlist_screen():
-    st.markdown("""
-    <div class="card" style="text-align:center;">
-        <div style="font-size:48px;">❤️</div>
-        <h2>My Wishlist</h2>
+    st.markdown(f"""
+    <div style="text-align:center; margin-bottom:28px;">
+        <span class="hero-emoji">❤</span>
+        <h1 style="margin-bottom:8px;">My Wishlist</h1>
+        <p style="color:#A89880; font-size:15px;">{len(st.session_state.wishlist)} saved gift(s)</p>
     </div>
     """, unsafe_allow_html=True)
 
     if not st.session_state.wishlist:
         st.markdown("""
-        <div class="card" style="text-align:center;">
-            <p>Your wishlist is empty. Find some gifts first! 🎁</p>
+        <div class="card" style="text-align:center; padding:48px;">
+            <p style="color:#A89880; font-size:15px;">Nothing saved yet — go find some gifts! 🎁</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         for i, gift in enumerate(st.session_state.wishlist):
             st.markdown(f"""
-            <div class="gift-card">
-                <h3 style="text-align:left; margin-bottom:8px;">🎀 {gift['name']}</h3>
-                <p style="margin-bottom:10px;">{gift['reason']}</p>
+            <div class="card-sm">
+                <h3 style="margin: 0 0 6px; font-size:1.1rem;">{gift['name']}</h3>
+                <p style="color:#7A6A5E; font-size:14px; margin-bottom:10px;">{gift['reason']}</p>
                 <span class="tag">💰 {gift['price']}</span>
                 <span class="tag">🎨 {gift['style']}</span>
-                <span class="tag">📦 {gift['delivery']}</span>
             </div>
             """, unsafe_allow_html=True)
 
@@ -352,20 +432,24 @@ def wishlist_screen():
             with col1:
                 st.link_button("🛒 Amazon", gift["amazon"], use_container_width=True)
             with col2:
-                st.link_button("🛍️ Flipkart", gift["flipkart"], use_container_width=True)
+                st.link_button("🛍 Flipkart", gift["flipkart"], use_container_width=True)
             with col3:
-                if st.button(f"🗑️ Remove", key=f"remove_{i}", use_container_width=True):
+                if st.button("🗑 Remove", key=f"remove_{i}", use_container_width=True):
                     st.session_state.wishlist.pop(i)
                     st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("⬅️ Back to Home", use_container_width=True):
-        st.session_state.page = "landing"
-        st.rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("← Back to Home", use_container_width=True):
+            st.session_state.page = "landing"
+            st.rerun()
+    with col2:
+        if st.button("✦ Find more gifts", use_container_width=True):
+            st.session_state.page = "chat"
+            st.rerun()
 
-# -------------------------------------------------
-# ROUTER
-# -------------------------------------------------
+# ── Router ──
 if st.session_state.page == "loading":
     loading_screen()
 elif st.session_state.page == "landing":
@@ -375,4 +459,4 @@ elif st.session_state.page == "chat":
 elif st.session_state.page == "result":
     result_screen()
 elif st.session_state.page == "wishlist":
-    wishlist_screen()
+    wishlist_screen()e
